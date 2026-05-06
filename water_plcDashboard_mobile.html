@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<title>Water System Control</title>
+</head>
+<body>
+
+<style>
+:root{--c1:#0f1923;--c2:#1a2535;--c3:#243040;--c4:#2e3d50;--acc:#00c9a7;--acc2:#0096ff;--warn:#f59e0b;--danger:#ef4444;--ok:#22c55e;--txt:#e2e8f0;--txt2:#94a3b8;--border:#2e3d50}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:transparent;color:var(--txt);font-family:'Courier New',monospace;font-size:13px}
+.dash{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px;background:linear-gradient(135deg,#0a1628,#0f1f35)}
+.panel{background:var(--c2);border:1px solid var(--c4);border-radius:8px;padding:12px}
+.panel-title{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--acc);margin-bottom:12px;border-bottom:1px solid var(--c4);padding-bottom:8px;display:flex;align-items:center;gap:6px}
+.panel-title::before{content:'';width:6px;height:6px;background:var(--acc);border-radius:50%;display:inline-block;box-shadow:0 0 6px var(--acc)}
+.full-width{grid-column:1/-1}
+.sensor-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.sensor-card{background:var(--c3);border:1px solid var(--c4);border-radius:6px;padding:10px;text-align:center}
+.sensor-label{font-size:10px;color:var(--txt2);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+.sensor-val{font-size:20px;font-weight:700;color:var(--acc);font-family:'Courier New',monospace}
+.sensor-unit{font-size:10px;color:var(--txt2);margin-top:2px}
+.tank-visual{display:flex;gap:16px;align-items:flex-end;justify-content:center;margin:8px 0}
+.tank-wrap{text-align:center;flex:1}
+.tank-outer{width:60px;height:100px;border:2px solid var(--acc);border-radius:4px;margin:0 auto 6px;position:relative;background:var(--c1);overflow:hidden}
+.tank-fill{position:absolute;bottom:0;width:100%;background:linear-gradient(to top,#0096ff88,#00c9a744);transition:height 0.5s;border-top:1px solid var(--acc2)}
+.tank-pct{font-size:11px;color:var(--acc);font-weight:700}
+.tank-name{font-size:10px;color:var(--txt2);text-transform:uppercase;letter-spacing:1px}
+.pump-row{display:flex;flex-direction:column;gap:8px}
+.pump-item{display:flex;align-items:center;gap:10px;background:var(--c3);border-radius:6px;padding:8px 10px}
+.pump-name{font-size:11px;font-weight:700;letter-spacing:1px;width:65px;color:var(--txt2)}
+.pump-status{padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:1px;min-width:65px;text-align:center;transition:all 0.3s}
+.status-open{background:#22c55e22;color:#22c55e;border:1px solid #22c55e55}
+.status-closed{background:#ef444422;color:#ef4444;border:1px solid #ef444455}
+.status-unknown{background:#f59e0b22;color:#f59e0b;border:1px solid #f59e0b55}
+.btn-grp{display:flex;gap:6px;margin-left:auto}
+.btn{padding:4px 10px;border:1px solid;border-radius:4px;cursor:pointer;font-size:11px;font-weight:700;letter-spacing:1px;transition:all 0.2s;background:transparent;font-family:'Courier New',monospace}
+.btn-on{border-color:var(--ok);color:var(--ok)}.btn-on:hover{background:#22c55e22}
+.btn-off{border-color:var(--danger);color:var(--danger)}.btn-off:hover{background:#ef444422}
+.valve-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.valve-item{background:var(--c3);border-radius:6px;padding:8px;text-align:center}
+.valve-name{font-size:10px;color:var(--txt2);letter-spacing:1px;margin-bottom:6px}
+.valve-icon{width:32px;height:32px;margin:0 auto 6px;position:relative}
+.valve-icon svg{width:100%;height:100%}
+.valve-btns{display:flex;gap:4px;justify-content:center}
+.vbtn{padding:3px 8px;border:1px solid;border-radius:3px;cursor:pointer;font-size:10px;font-weight:700;background:transparent;font-family:'Courier New',monospace;transition:all 0.2s}
+.vbtn-o{border-color:var(--ok);color:var(--ok)}.vbtn-o:hover{background:#22c55e22}
+.vbtn-c{border-color:var(--danger);color:var(--danger)}.vbtn-c:hover{background:#ef444422}
+.log-box{background:var(--c1);border:1px solid var(--c4);border-radius:6px;padding:8px;height:100px;overflow-y:auto;font-size:11px;font-family:'Courier New',monospace}
+.log-entry{padding:1px 0;color:var(--txt2)}
+.log-entry.ok{color:var(--ok)}.log-entry.err{color:var(--danger)}.log-entry.info{color:var(--acc)}
+.mqtt-bar{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--c1);border-radius:6px;border:1px solid var(--c4);margin-bottom:10px}
+.mqtt-dot{width:8px;height:8px;border-radius:50%;background:var(--danger);transition:background 0.3s}
+.mqtt-dot.connected{background:var(--ok);box-shadow:0 0 6px var(--ok)}
+.mqtt-label{font-size:11px;color:var(--txt2);flex:1}
+.mqtt-server{font-size:11px;color:var(--acc);font-family:'Courier New',monospace}
+.send-btn{padding:5px 14px;background:var(--acc)22;border:1px solid var(--acc);border-radius:4px;color:var(--acc);cursor:pointer;font-size:12px;font-weight:700;font-family:'Courier New',monospace;transition:all 0.2s}
+.send-btn:hover{background:var(--acc)44}
+.badge{display:inline-block;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:1px}
+.badge-vfd{background:#0096ff22;color:#0096ff;border:1px solid #0096ff44}
+.badge-dol{background:#a855f722;color:#a855f7;border:1px solid #a855f744}
+.badge-soft{background:#f9731622;color:#f97316;border:1px solid #f9731644}
+.seq-btns{display:flex;gap:6px;margin-top:6px}
+.seq-btn{padding:6px 12px;border-radius:5px;cursor:pointer;font-size:11px;font-weight:700;font-family:'Courier New',monospace;letter-spacing:1px;transition:all 0.2s;border:1px solid}
+.seq-start{border-color:var(--ok);color:var(--ok);background:transparent}.seq-start:hover{background:#22c55e22}
+.seq-stop{border-color:var(--warn);color:var(--warn);background:transparent}.seq-stop:hover{background:#f59e0b22}
+.seq-reset{border-color:var(--txt2);color:var(--txt2);background:transparent}.seq-reset:hover{background:#ffffff11}
+.sub-label{font-size:10px;color:var(--txt2);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;margin-top:10px}
+
+/* scenario builder */
+.sc-tabs-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.sc-tab{padding:3px 9px;border:1px solid var(--c4);border-radius:4px;cursor:pointer;font-size:10px;font-weight:700;color:var(--txt2);background:transparent;font-family:'Courier New',monospace;display:flex;align-items:center;gap:4px;transition:all .2s}
+.sc-tab.active{border-color:var(--acc);color:var(--acc);background:#00c9a710}
+.sc-tab-x{width:13px;height:13px;border-radius:50%;border:1px solid #ef444450;color:var(--danger);background:transparent;cursor:pointer;font-size:9px;display:flex;align-items:center;justify-content:center;padding:0;font-family:'Courier New',monospace;line-height:1}
+.sc-tab-x:hover{background:#ef444422}
+.sc-new-btn{padding:3px 9px;border:1px dashed var(--acc);border-radius:4px;cursor:pointer;font-size:10px;font-weight:700;color:var(--acc);background:transparent;font-family:'Courier New',monospace}
+.sc-new-btn:hover{background:#00c9a710}
+.sc-namebar{display:flex;gap:6px;margin-bottom:8px}
+.sc-name-in{flex:1;background:var(--c1);border:1px solid var(--c4);border-radius:4px;padding:4px 8px;font-size:11px;font-weight:700;color:var(--acc);font-family:'Courier New',monospace}
+.sc-name-in:focus{outline:none;border-color:var(--acc)}
+.sc-save-btn{padding:4px 10px;border:1px solid var(--acc2);border-radius:4px;background:transparent;color:var(--acc2);cursor:pointer;font-size:10px;font-weight:700;font-family:'Courier New',monospace}
+.sc-save-btn:hover{background:#0096ff18}
+.sc-builder-wrap{display:flex;gap:8px}
+.sc-palette{width:130px;flex-shrink:0;display:flex;flex-direction:column;gap:4px}
+.sc-palette-title{font-size:9px;color:var(--txt2);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;margin-top:6px}
+.sc-palette-title:first-child{margin-top:0}
+.sc-blk{padding:5px 8px;border-radius:4px;cursor:grab;font-size:10px;font-weight:700;border:1px solid;user-select:none;display:flex;align-items:center;gap:5px;font-family:'Courier New',monospace;transition:transform .1s}
+.sc-blk:active{transform:scale(.97);cursor:grabbing}
+.sc-blk.pump{background:#22c55e10;border-color:#22c55e30;color:var(--ok)}
+.sc-blk.valve{background:#0096ff10;border-color:#0096ff30;color:var(--acc2)}
+.sc-blk.seq{background:#a855f710;border-color:#a855f730;color:#a855f7}
+.sc-blk.wait{background:#f59e0b10;border-color:#f59e0b30;color:var(--warn)}
+.sc-blk.custom{background:#ef444410;border-color:#ef444430;color:var(--danger)}
+.sc-blk.cond{background:#e879f910;border-color:#e879f930;color:#e879f9}
+.sc-canvas{flex:1;background:var(--c1);border:2px dashed var(--c4);border-radius:6px;padding:8px;min-height:160px;position:relative;overflow-y:auto}
+.sc-canvas.over{border-color:var(--acc);background:#00c9a706}
+.sc-canvas-hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:var(--txt2);font-size:10px;text-align:center;pointer-events:none;line-height:1.8;font-family:'Courier New',monospace}
+.sc-block{display:flex;align-items:center;gap:6px;background:var(--c3);border:1px solid var(--c4);border-radius:5px;padding:5px 7px;margin-bottom:5px;animation:sli .12s ease;font-family:'Courier New',monospace}
+@keyframes sli{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
+.sc-block-handle{color:var(--txt2);cursor:grab;font-size:13px;flex-shrink:0}
+.sc-block-tag{padding:2px 7px;border-radius:3px;font-size:10px;font-weight:700;white-space:nowrap;flex-shrink:0;font-family:'Courier New',monospace}
+.sc-block-tag.pump{background:#22c55e10;border:1px solid #22c55e30;color:var(--ok)}
+.sc-block-tag.valve{background:#0096ff10;border:1px solid #0096ff30;color:var(--acc2)}
+.sc-block-tag.seq{background:#a855f710;border:1px solid #a855f730;color:#a855f7}
+.sc-block-tag.wait{background:#f59e0b10;border:1px solid #f59e0b30;color:var(--warn)}
+.sc-block-tag.custom{background:#ef444410;border:1px solid #ef444430;color:var(--danger)}
+.sc-block-tag.cond{background:#e879f910;border:1px solid #e879f930;color:#e879f9}
+/* condition block inline inputs */
+.sc-cond-row{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.sc-in.cond-val{width:52px}
+.sc-in.cond-timeout{width:52px}
+.sc-cond-badge{font-size:9px;color:#e879f9;background:#e879f910;border:1px solid #e879f930;border-radius:3px;padding:1px 5px;white-space:nowrap}
+.sc-sel{background:var(--c1);border:1px solid var(--c4);border-radius:3px;padding:2px 5px;font-size:10px;color:var(--txt);font-family:'Courier New',monospace;cursor:pointer}
+.sc-sel:focus{outline:none;border-color:var(--acc)}
+.sc-in{background:var(--c1);border:1px solid var(--c4);border-radius:3px;padding:2px 5px;font-size:10px;color:var(--txt);font-family:'Courier New',monospace}
+.sc-in:focus{outline:none;border-color:var(--acc)}
+.sc-in.delay{width:55px}.sc-in.topic{width:150px}.sc-in.payload{width:42px}
+.sc-dlbl{font-size:9px;color:var(--txt2)}
+.sc-block-del{margin-left:auto;width:16px;height:16px;border-radius:3px;background:transparent;border:1px solid #ef444440;color:var(--danger);cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;padding:0;flex-shrink:0;font-family:'Courier New',monospace}
+.sc-block-del:hover{background:#ef444422}
+.sc-footer{display:flex;gap:6px;margin-top:8px;align-items:center;flex-wrap:wrap}
+.sc-run-btn{padding:5px 14px;border:1px solid var(--ok);border-radius:4px;background:transparent;color:var(--ok);cursor:pointer;font-size:11px;font-weight:700;font-family:'Courier New',monospace;letter-spacing:1px}
+.sc-run-btn:hover{background:#22c55e18}
+.sc-clr-btn{padding:5px 10px;border:1px solid var(--c4);border-radius:4px;background:transparent;color:var(--txt2);cursor:pointer;font-size:11px;font-weight:700;font-family:'Courier New',monospace}
+.sc-clr-btn:hover{background:#ffffff08}
+
+/* recorder strip */
+.rec-strip{display:flex;align-items:center;gap:10px;padding:7px 10px;background:var(--c1);border:1px solid var(--c4);border-radius:6px;margin-top:10px;flex-wrap:wrap}
+.rec-dot{width:9px;height:9px;border-radius:50%;background:var(--c4);flex-shrink:0;transition:all .3s}
+.rec-dot.recording{background:var(--danger);box-shadow:0 0 7px var(--danger);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.rec-lbl{font-size:10px;color:var(--txt2);font-family:'Courier New',monospace;letter-spacing:1px}
+.rec-count{font-size:10px;color:var(--acc);font-family:'Courier New',monospace;min-width:70px}
+.rec-freq-wrap{display:flex;align-items:center;gap:5px;margin-left:4px}
+.rec-freq-lbl{font-size:10px;color:var(--txt2);font-family:'Courier New',monospace}
+.rec-freq-in{width:60px;background:var(--c3);border:1px solid var(--c4);border-radius:3px;padding:2px 6px;font-size:10px;color:var(--txt);font-family:'Courier New',monospace;text-align:center}
+.rec-freq-in:focus{outline:none;border-color:var(--acc)}
+.rec-btn{padding:4px 12px;border:1px solid;border-radius:4px;cursor:pointer;font-size:10px;font-weight:700;font-family:'Courier New',monospace;letter-spacing:1px;background:transparent;transition:all .2s}
+.rec-start{border-color:var(--danger);color:var(--danger)}.rec-start:hover{background:#ef444418}
+.rec-stop{border-color:var(--txt2);color:var(--txt2)}.rec-stop:hover{background:#ffffff08}
+.rec-dl{border-color:var(--acc2);color:var(--acc2)}.rec-dl:hover{background:#0096ff18}
+.rec-dl:disabled{opacity:.35;cursor:not-allowed}
+
+/* MOBILE RESPONSIVE */
+@media (max-width: 768px) {
+  body { font-size: 14px; }
+  .dash { grid-template-columns: 1fr !important; gap: 8px; padding: 8px; }
+  .full-width { grid-column: 1 !important; }
+  .mqtt-bar { flex-wrap: wrap; gap: 6px; }
+  .mqtt-label { min-width: 0; flex: 1 1 100%; order: -1; }
+  .mqtt-server { flex: 1 1 auto; }
+  .tank-visual { gap: 24px; justify-content: center; }
+  .tank-outer { width: 70px; height: 120px; }
+  .tank-pct { font-size: 13px; }
+  .sensor-grid { grid-template-columns: repeat(2, 1fr); }
+  .sensor-val { font-size: 22px; }
+  .pump-item { flex-wrap: wrap; gap: 6px; }
+  .pump-name { width: auto; flex: 1 1 auto; }
+  .pump-status { flex: 0 0 auto; }
+  .btn-grp { margin-left: auto; }
+  .btn { padding: 7px 14px; font-size: 12px; }
+  .seq-btns { flex-wrap: wrap; }
+  .seq-btn { flex: 1 1 calc(33% - 6px); padding: 8px 4px; font-size: 10px; text-align: center; }
+  .valve-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .vbtn { padding: 6px 10px; font-size: 11px; }
+  .valve-icon { width: 38px; height: 38px; }
+  .sc-builder-wrap { flex-direction: column; }
+  .sc-palette { width: 100% !important; flex-direction: row; flex-wrap: wrap; gap: 5px; padding-bottom: 8px; border-bottom: 1px solid var(--c4); margin-bottom: 8px; }
+  .sc-palette-title { width: 100%; margin-top: 4px; }
+  .sc-blk { flex: 0 0 auto; }
+  .sc-canvas { min-height: 120px; }
+  .sc-cond-row { flex-wrap: wrap; gap: 4px; }
+  .rec-strip { flex-wrap: wrap; gap: 6px; }
+  .rec-lbl { flex: 1 1 auto; }
+  .rec-count { flex: 0 0 auto; }
+  .rec-freq-wrap { flex: 0 0 auto; }
+  .rec-btn { padding: 7px 12px; font-size: 11px; flex: 1 1 auto; text-align: center; }
+  .sc-tab { padding: 6px 10px; font-size: 11px; }
+  .sc-tab-x { width: 16px; height: 16px; font-size: 11px; }
+  .sc-namebar { flex-wrap: wrap; }
+  .sc-name-in { flex: 1 1 100%; }
+  .sc-save-btn, .sc-new-btn { flex: 1 1 auto; text-align: center; padding: 7px; }
+  .sc-in.delay { width: 52px; }
+  .sc-in.topic { width: 100%; }
+  .sc-in.payload { width: 44px; }
+  .sc-sel { min-width: 70px; }
+  .sc-block { flex-wrap: wrap; }
+  .sc-block-del { margin-left: auto; }
+  .log-box { height: 120px; font-size: 12px; }
+  .send-btn { padding: 7px 16px; }
+}
+@media (min-width: 480px) and (max-width: 768px) {
+  .valve-grid { grid-template-columns: repeat(4, 1fr); }
+  .sensor-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+</style>
+
+<div class="dash">
+
+<!-- MQTT BAR -->
+<div class="panel full-width">
+  <div class="mqtt-bar">
+    <div class="mqtt-dot" id="mqttDot"></div>
+    <span class="mqtt-label" id="mqttLabel">Disconnected — broker.hivemq.com:1883</span>
+    <span class="mqtt-server">water/system/telemetry</span>
+    <button class="send-btn" id="connectBtn" onclick="toggleMqtt()">CONNECT</button>
+  </div>
+</div>
+
+<!-- TANK LEVELS -->
+<div class="panel">
+  <div class="panel-title">Tank Levels</div>
+  <div class="tank-visual">
+    <div class="tank-wrap">
+      <div class="tank-outer"><div class="tank-fill" id="fillDown" style="height:50%"></div></div>
+      <div class="tank-pct" id="pctDown">50%</div>
+      <div class="tank-name">DownTank</div>
+    </div>
+    <div class="tank-wrap">
+      <div class="tank-outer"><div class="tank-fill" id="fillUp" style="height:20%"></div></div>
+      <div class="tank-pct" id="pctUp">20%</div>
+      <div class="tank-name">UpTank</div>
+    </div>
+  </div>
+  <div class="sub-label">Flow &amp; Pressure</div>
+  <div class="sensor-grid">
+    <div class="sensor-card"><div class="sensor-label">Flow 1</div><div class="sensor-val" id="sFlow1">—</div><div class="sensor-unit">m³/h</div></div>
+    <div class="sensor-card"><div class="sensor-label">Flow 2</div><div class="sensor-val" id="sFlow2">—</div><div class="sensor-unit">m³/h</div></div>
+    <div class="sensor-card"><div class="sensor-label">Pressure 1</div><div class="sensor-val" id="sP1">—</div><div class="sensor-unit">bar</div></div>
+    <div class="sensor-card"><div class="sensor-label">Pressure 2</div><div class="sensor-val" id="sP2">—</div><div class="sensor-unit">bar</div></div>
+    <div class="sensor-card"><div class="sensor-label">Level Top</div><div class="sensor-val" id="sTop">—</div><div class="sensor-unit">cm</div></div>
+    <div class="sensor-card"><div class="sensor-label">Level Bot</div><div class="sensor-val" id="sBot">—</div><div class="sensor-unit">cm</div></div>
+  </div>
+</div>
+
+<!-- PUMPS -->
+<div class="panel">
+  <div class="panel-title">Pumps</div>
+  <div class="pump-row">
+    <div class="pump-item">
+      <div class="pump-name">PUMP A <span class="badge badge-vfd">Cont</span></div>
+      <div class="pump-status status-unknown" id="stPumpA">UNKNOWN</div>
+      <div class="btn-grp">
+        <button class="btn btn-on" onclick="sendCmd('water/control/pumpA','1')">ON</button>
+        <button class="btn btn-off" onclick="sendCmd('water/control/pumpA','0')">OFF</button>
+      </div>
+    </div>
+    <div class="pump-item">
+      <div class="pump-name">PUMP B <span class="badge badge-dol">SOFT</span></div>
+      <div class="pump-status status-unknown" id="stPumpB">UNKNOWN</div>
+      <div class="btn-grp">
+        <button class="btn btn-on" onclick="sendCmd('water/control/pumpB','1')">ON</button>
+        <button class="btn btn-off" onclick="sendCmd('water/control/pumpB','0')">OFF</button>
+      </div>
+    </div>
+    <div class="pump-item">
+      <div class="pump-name">PUMP C <span class="badge badge-soft">VFD</span></div>
+      <div class="pump-status status-unknown" id="stPumpC">UNKNOWN</div>
+      <div class="btn-grp">
+        <button class="btn btn-on" onclick="sendCmd('water/control/pumpC','1')">ON</button>
+        <button class="btn btn-off" onclick="sendCmd('water/control/pumpC','0')">OFF</button>
+      </div>
+    </div>
+  </div>
+  <div class="sub-label" style="margin-top:12px">Sequence Control</div>
+  <div class="seq-btns">
+    <button class="seq-btn seq-start" onclick="sendCmd('water/control/startSequence','1')">▶ START SEQ</button>
+    <button class="seq-btn seq-stop" onclick="sendCmd('water/control/stopSequence','1')">■ STOP SEQ</button>
+    <button class="seq-btn seq-reset" onclick="sendCmd('water/control/resetSequence','1')">↺ RESET</button>
+  </div>
+</div>
+
+<!-- VALVES -->
+<div class="panel full-width">
+  <div class="panel-title">Valves</div>
+  <div class="valve-grid" id="valveGrid"></div>
+</div>
+
+<!-- SCENARIO BUILDER -->
+<div class="panel full-width">
+  <div class="panel-title">Scenarios</div>
+  <div class="sc-tabs-row" id="scTabs"></div>
+  <div class="sc-namebar">
+    <input class="sc-name-in" id="scNameIn" placeholder="Scenario name..."/>
+    <button class="sc-save-btn" onclick="saveScName()">SAVE NAME</button>
+    <button class="sc-new-btn" onclick="newScenario()">+ NEW</button>
+  </div>
+  <div class="sc-builder-wrap">
+    <div class="sc-palette">
+      <div class="sc-palette-title">Pumps</div>
+      <div class="sc-blk pump" draggable="true" data-type="pumpOn">⚡ Pump ON</div>
+      <div class="sc-blk pump" draggable="true" data-type="pumpOff">○ Pump OFF</div>
+      <div class="sc-palette-title">Valves</div>
+      <div class="sc-blk valve" draggable="true" data-type="valveOpen">⊕ Valve OPEN</div>
+      <div class="sc-blk valve" draggable="true" data-type="valveClose">⊗ Valve CLOSE</div>
+      <div class="sc-palette-title">Sequence</div>
+      <div class="sc-blk seq" draggable="true" data-type="startSeq">▶ Start SEQ</div>
+      <div class="sc-blk seq" draggable="true" data-type="stopSeq">■ Stop SEQ</div>
+      <div class="sc-blk seq" draggable="true" data-type="resetSeq">↺ Reset SEQ</div>
+      <div class="sc-palette-title">Timing</div>
+      <div class="sc-blk wait" draggable="true" data-type="wait">⏱ Wait</div>
+      <div class="sc-palette-title">Custom</div>
+      <div class="sc-blk custom" draggable="true" data-type="custom">✎ Custom MSG</div>
+      <div class="sc-palette-title">Condition</div>
+      <div class="sc-blk cond" draggable="true" data-type="condition">⚑ Condition</div>
+    </div>
+    <div class="sc-canvas" id="scCanvas" ondragover="scDragOver(event)" ondrop="scDrop(event)" ondragleave="scDragLeave()">
+      <div class="sc-canvas-hint" id="scHint">Drag blocks here<br>to build your scenario</div>
+    </div>
+  </div>
+  <div class="sc-footer">
+    <button class="sc-run-btn" onclick="runScenario()">▶ RUN SCENARIO</button>
+    <button class="sc-clr-btn" onclick="clearCanvas()">CLEAR</button>
+  </div>
+
+  <!-- DATA RECORDER STRIP -->
+  <div class="rec-strip">
+    <div class="rec-dot" id="recDot"></div>
+    <span class="rec-lbl">DATA RECORDER</span>
+    <span class="rec-count" id="recCount">0 rows</span>
+    <div class="rec-freq-wrap">
+      <span class="rec-freq-lbl">Every</span>
+      <input class="rec-freq-in" id="recFreq" type="number" min="100" max="60000" step="100" value="500"/>
+      <span class="rec-freq-lbl">ms</span>
+    </div>
+    <button class="rec-btn rec-start" id="recStartBtn" onclick="startRecording()">⏺ RECORD</button>
+    <button class="rec-btn rec-stop" id="recStopBtn" onclick="stopRecording()" style="display:none">⏹ STOP</button>
+    <button class="rec-btn rec-dl" id="recDlBtn" onclick="downloadExcel()" disabled>⬇ EXPORT XLSX</button>
+  </div>
+</div>
+
+<!-- ACTIVITY LOG -->
+<div class="panel full-width">
+  <div class="panel-title">Activity Log</div>
+  <div class="log-box" id="logBox"></div>
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/4.3.7/mqtt.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+// ── MQTT ──
+let client=null,connected=false;
+const BROKER='wss://broker.hivemq.com:8884/mqtt';
+
+// last known telemetry snapshot
+let lastTelemetry={sensors:{},pumps:{},valves:{}};
+
+function log(msg,type='info'){
+  const b=document.getElementById('logBox');
+  const d=document.createElement('div');
+  d.className='log-entry '+type;
+  d.textContent='['+new Date().toTimeString().slice(0,8)+'] '+msg;
+  b.appendChild(d);b.scrollTop=b.scrollHeight;
+  while(b.children.length>60)b.removeChild(b.firstChild);
+}
+
+function setMqttStatus(ok,msg){
+  document.getElementById('mqttDot').className='mqtt-dot'+(ok?' connected':'');
+  document.getElementById('mqttLabel').innerHTML=(ok?'Connected — ':'Disconnected — ')+msg;
+  document.getElementById('connectBtn').textContent=ok?'DISCONNECT':'CONNECT';
+  connected=ok;
+}
+
+function toggleMqtt(){
+  if(connected){client&&client.end();setMqttStatus(false,'broker.hivemq.com:1883');return;}
+  log('Connecting to MQTT broker...','info');
+  try{
+    client=mqtt.connect(BROKER,{clientId:'WaterDashUI_'+Math.random().toString(16).slice(2)});
+    client.on('connect',()=>{
+      setMqttStatus(true,'broker.hivemq.com:8884');
+      log('MQTT connected','ok');
+      client.subscribe('water/system/telemetry');
+      client.subscribe('water/control/#');
+    });
+    client.on('message',(topic,payload)=>{
+      const msg=payload.toString();
+      if(topic==='water/system/telemetry'){try{parseTelemetry(JSON.parse(msg));}catch(e){}}
+      else{log('← '+topic+': '+msg,'info');}
+    });
+    client.on('error',e=>{log('Error: '+e.message,'err');setMqttStatus(false,'broker.hivemq.com');});
+    client.on('close',()=>{setMqttStatus(false,'broker.hivemq.com:1883');log('Disconnected','err');});
+  }catch(e){log('Failed: '+e.message,'err');}
+}
+
+function parseTelemetry(d){
+  lastTelemetry=d;
+  const s=d.sensors||{};
+  const set=(id,v)=>{const el=document.getElementById(id);if(el&&v!==undefined)el.textContent=parseFloat(v).toFixed(2);};
+  set('sFlow1',s.flow1);set('sFlow2',s.flow2);
+  set('sP1',s.pressure1);set('sP2',s.pressure2);
+  set('sTop',s.levelTop);set('sBot',s.levelBottom);
+  const top=parseFloat(s.levelTop)||0,bot=parseFloat(s.levelBottom)||0;
+  document.getElementById('fillUp').style.height=Math.min(100,Math.max(0,top))+'%';
+  document.getElementById('pctUp').textContent=(top).toFixed(2)+' cm';
+  document.getElementById('fillDown').style.height=Math.min(100,Math.max(0,bot))+'%';
+  document.getElementById('pctDown').textContent=(bot).toFixed(2)+' cm';
+  if(d.pumps){setPump('stPumpA',d.pumps.pumpA);setPump('stPumpB',d.pumps.pumpB);setPump('stPumpC',d.pumps.pumpC);}
+  if(d.valves){for(let i=1;i<=8;i++){const v=d.valves['valve'+i];if(v)setValveStatus(i,v);}}
+}
+
+function setPump(id,status){
+  const el=document.getElementById(id);if(!el)return;
+  el.textContent=status;el.className='pump-status';
+  if(status==='OPEN')el.classList.add('status-open');
+  else if(status==='CLOSED')el.classList.add('status-closed');
+  else el.classList.add('status-unknown');
+}
+
+function setValveStatus(i,status){
+  const el=document.getElementById('vstatus'+i);if(!el)return;
+  el.className='pump-status';el.textContent=status;
+  if(status==='OPEN')el.classList.add('status-open');
+  else if(status==='CLOSED')el.classList.add('status-closed');
+  else el.classList.add('status-unknown');
+}
+
+function sendCmd(topic,payload){
+  if(!connected){log('Not connected to MQTT','err');return;}
+  client.publish(topic,payload);
+  log('→ '+topic+': '+payload,'ok');
+}
+
+// ── VALVES ──
+function buildValves(){
+  const g=document.getElementById('valveGrid');
+  for(let i=1;i<=8;i++){
+    const d=document.createElement('div');d.className='valve-item';
+    d.innerHTML=`<div class="valve-name">VALVE ${i}</div>
+<div class="valve-icon"><svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect x="4" y="13" width="24" height="6" rx="2" fill="#2e3d50" stroke="#00c9a7" stroke-width="1.2"/>
+<circle cx="16" cy="16" r="5" fill="#1a2535" stroke="#00c9a7" stroke-width="1.2"/>
+<rect x="14.5" y="4" width="3" height="7" rx="1" fill="#00c9a7"/>
+</svg></div>
+<div class="pump-status status-unknown" id="vstatus${i}" style="font-size:10px;padding:2px 6px;margin-bottom:6px">—</div>
+<div class="valve-btns">
+<button class="vbtn vbtn-o" onclick="sendCmd('water/control/valve${i}','1')">OPEN</button>
+<button class="vbtn vbtn-c" onclick="sendCmd('water/control/valve${i}','0')">CLOSE</button>
+</div>`;
+    g.appendChild(d);
+  }
+}
+
+// ── RECORDER ──
+let recInterval=null,recRows=[],recScenarioName='';
+
+function startRecording(){
+  const freqVal=parseInt(document.getElementById('recFreq').value)||500;
+  if(freqVal<100){log('Minimum recording frequency is 100 ms','err');return;}
+  recRows=[];
+  recScenarioName=scenarios[activeIdx]?scenarios[activeIdx].name:'session';
+  updateRecCount();
+  document.getElementById('recDot').classList.add('recording');
+  document.getElementById('recStartBtn').style.display='none';
+  document.getElementById('recStopBtn').style.display='';
+  document.getElementById('recDlBtn').disabled=true;
+  document.getElementById('recFreq').disabled=true;
+  log('⏺ Recording started — every '+freqVal+' ms','info');
+  recInterval=setInterval(()=>{
+    const s=lastTelemetry.sensors||{};
+    const p=lastTelemetry.pumps||{};
+    const v=lastTelemetry.valves||{};
+    recRows.push({
+      Timestamp:new Date().toISOString(),
+      Flow1:s.flow1??'',Flow2:s.flow2??'',
+      Pressure1:s.pressure1??'',Pressure2:s.pressure2??'',
+      LevelTop:s.levelTop??'',LevelBottom:s.levelBottom??'',
+      PumpA:p.pumpA??'',PumpB:p.pumpB??'',PumpC:p.pumpC??'',
+      Valve1:v.valve1??'',Valve2:v.valve2??'',Valve3:v.valve3??'',
+      Valve4:v.valve4??'',Valve5:v.valve5??'',Valve6:v.valve6??'',
+      Valve7:v.valve7??'',Valve8:v.valve8??''
+    });
+    updateRecCount();
+  },freqVal);
+}
+
+function stopRecording(){
+  clearInterval(recInterval);recInterval=null;
+  document.getElementById('recDot').classList.remove('recording');
+  document.getElementById('recStartBtn').style.display='';
+  document.getElementById('recStopBtn').style.display='none';
+  document.getElementById('recDlBtn').disabled=recRows.length===0;
+  document.getElementById('recFreq').disabled=false;
+  log('⏹ Recording stopped — '+recRows.length+' rows captured','ok');
+}
+
+function updateRecCount(){
+  document.getElementById('recCount').textContent=recRows.length+' rows';
+}
+
+function downloadExcel(){
+  if(!recRows.length){log('No data to export','err');return;}
+  const ws=XLSX.utils.json_to_sheet(recRows);
+  // column widths
+  ws['!cols']=[{wch:26},{wch:10},{wch:10},{wch:12},{wch:12},{wch:11},{wch:13},{wch:9},{wch:9},{wch:9},{wch:9},{wch:9},{wch:9},{wch:9},{wch:9},{wch:9},{wch:9}];
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Data');
+  const fname='scenario_'+recScenarioName.replace(/[^a-z0-9]/gi,'_')+'_'+new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')+'.xlsx';
+  XLSX.writeFile(wb,fname);
+  log('⬇ Exported '+recRows.length+' rows → '+fname,'ok');
+}
+
+// ── SCENARIO BUILDER ──
+const PUMP_TOPICS={A:'water/control/pumpA',B:'water/control/pumpB',C:'water/control/pumpC'};
+const VALVE_TOPICS={1:'water/control/valve1',2:'water/control/valve2',3:'water/control/valve3',4:'water/control/valve4',5:'water/control/valve5',6:'water/control/valve6',7:'water/control/valve7',8:'water/control/valve8'};
+const BLK_LABEL={pumpOn:'Pump ON',pumpOff:'Pump OFF',valveOpen:'Valve OPEN',valveClose:'Valve CLOSE',startSeq:'Start SEQ',stopSeq:'Stop SEQ',resetSeq:'Reset SEQ',wait:'Wait',custom:'Custom MSG',condition:'Condition'};
+const BLK_CLS={pumpOn:'pump',pumpOff:'pump',valveOpen:'valve',valveClose:'valve',startSeq:'seq',stopSeq:'seq',resetSeq:'seq',wait:'wait',custom:'custom',condition:'cond'};
+const BLK_ICO={pumpOn:'⚡',pumpOff:'○',valveOpen:'⊕',valveClose:'⊗',startSeq:'▶',stopSeq:'■',resetSeq:'↺',wait:'⏱',custom:'✎',condition:'⚑'};
+
+let scenarios=[
+  {name:'Normal Start',steps:[{type:'startSeq',pump:null,valve:null,delay:0,topic:'water/control/startSequence',payload:'1'}]},
+  {name:'PumpA Fault',steps:[{type:'pumpOff',pump:'A',valve:null,delay:0,topic:'water/control/pumpA',payload:'0'},{type:'pumpOn',pump:'B',valve:null,delay:800,topic:'water/control/pumpB',payload:'1'}]},
+  {name:'All Off',steps:[{type:'pumpOff',pump:'A',valve:null,delay:0,topic:'water/control/pumpA',payload:'0'},{type:'pumpOff',pump:'B',valve:null,delay:300,topic:'water/control/pumpB',payload:'0'},{type:'pumpOff',pump:'C',valve:null,delay:600,topic:'water/control/pumpC',payload:'0'}]}
+];
+let activeIdx=0,dragType=null;
+
+function renderTabs(){
+  const c=document.getElementById('scTabs');c.innerHTML='';
+  scenarios.forEach((sc,i)=>{
+    const t=document.createElement('div');t.className='sc-tab'+(i===activeIdx?' active':'');
+    const sp=document.createElement('span');sp.textContent=sc.name;sp.style.cursor='pointer';
+    sp.onclick=()=>{activeIdx=i;renderTabs();};
+    const x=document.createElement('button');x.className='sc-tab-x';x.textContent='x';
+    x.onclick=e=>{e.stopPropagation();delScenario(i);};
+    t.appendChild(sp);t.appendChild(x);c.appendChild(t);
+  });
+  document.getElementById('scNameIn').value=scenarios[activeIdx].name;
+  renderCanvas();
+}
+
+function newScenario(){scenarios.push({name:'Scenario '+(scenarios.length+1),steps:[]});activeIdx=scenarios.length-1;renderTabs();}
+function delScenario(i){if(scenarios.length<=1){log('Cannot delete last scenario','err');return;}scenarios.splice(i,1);if(activeIdx>=scenarios.length)activeIdx=scenarios.length-1;renderTabs();}
+function saveScName(){const v=document.getElementById('scNameIn').value.trim();if(!v)return;scenarios[activeIdx].name=v;renderTabs();}
+
+function renderCanvas(){
+  const c=document.getElementById('scCanvas');
+  c.querySelectorAll('.sc-block').forEach(e=>e.remove());
+  const sc=scenarios[activeIdx];
+  document.getElementById('scHint').style.display=sc.steps.length?'none':'block';
+  sc.steps.forEach((step,i)=>c.appendChild(makeBlock(step,i)));
+}
+
+function makeBlock(step,i){
+  const d=document.createElement('div');d.className='sc-block';
+  const cls=BLK_CLS[step.type]||'custom';
+  const lbl=BLK_LABEL[step.type]||step.type;
+  const ico=BLK_ICO[step.type]||'✎';
+  let inner='';
+  if(step.type==='pumpOn'||step.type==='pumpOff'){
+    const opts=['A','B','C'].map(p=>`<option value="${p}"${step.pump===p?' selected':''}>Pump ${p}</option>`).join('');
+    inner=`<select class="sc-sel" onchange="updPump(${i},this.value)"><option value="">—</option>${opts}</select>`
+      +` <span class="sc-dlbl">delay:</span><input class="sc-in delay" value="${step.delay||0}" onchange="updStep(${i},'delay',this.value)"/><span class="sc-dlbl">ms</span>`;
+  } else if(step.type==='valveOpen'||step.type==='valveClose'){
+    const opts=[1,2,3,4,5,6,7,8].map(v=>`<option value="${v}"${step.valve==v?' selected':''}>Valve ${v}</option>`).join('');
+    inner=`<select class="sc-sel" onchange="updValve(${i},this.value)"><option value="">—</option>${opts}</select>`
+      +` <span class="sc-dlbl">delay:</span><input class="sc-in delay" value="${step.delay||0}" onchange="updStep(${i},'delay',this.value)"/><span class="sc-dlbl">ms</span>`;
+  } else if(step.type==='wait'){
+    inner=`<span class="sc-dlbl">duration:</span><input class="sc-in delay" style="width:65px" value="${step.delay||1000}" onchange="updStep(${i},'delay',this.value)"/><span class="sc-dlbl">ms</span>`;
+  } else if(step.type==='custom'){
+    inner=`<input class="sc-in topic" value="${step.topic||''}" placeholder="water/control/..." onchange="updStep(${i},'topic',this.value)"/>`
+      +` <input class="sc-in payload" value="${step.payload||'1'}" placeholder="val" onchange="updStep(${i},'payload',this.value)"/>`
+      +` <span class="sc-dlbl">delay:</span><input class="sc-in delay" value="${step.delay||0}" onchange="updStep(${i},'delay',this.value)"/><span class="sc-dlbl">ms</span>`;
+  } else if(step.type==='condition'){
+    const sensorOpts=['levelTop','levelBottom','flow1','flow2','pressure1','pressure2']
+      .map(s=>`<option value="${s}"${step.sensor===s?' selected':''}>${s}</option>`).join('');
+    const opOpts=['>','>=','<','<=','==']
+      .map(o=>`<option value="${o}"${step.operator===o?' selected':''}>${o}</option>`).join('');
+    inner=`<div class="sc-cond-row">`
+      +`<span class="sc-dlbl">sensor:</span>`
+      +`<select class="sc-sel" onchange="updStep(${i},'sensor',this.value)">${sensorOpts}</select>`
+      +`<select class="sc-sel" onchange="updStep(${i},'operator',this.value)">${opOpts}</select>`
+      +`<input class="sc-in cond-val" type="number" value="${step.condValue??50}" placeholder="50" onchange="updStep(${i},'condValue',parseFloat(this.value))||0"/>`
+      +`<span class="sc-cond-badge">%/unit</span>`
+      +`<span class="sc-dlbl" style="margin-left:4px">timeout:</span>`
+      +`<input class="sc-in cond-timeout" type="number" value="${step.timeout??30000}" onchange="updStep(${i},'timeout',parseInt(this.value)||30000)"/>`
+      +`<span class="sc-dlbl">ms</span>`
+      +`</div>`;
+  } else {
+    inner=`<span class="sc-dlbl">delay:</span><input class="sc-in delay" value="${step.delay||0}" onchange="updStep(${i},'delay',this.value)"/><span class="sc-dlbl">ms</span>`;
+  }
+  d.innerHTML=`<span class="sc-block-handle" draggable="true" data-si="${i}">⠿</span>`
+    +`<span class="sc-block-tag ${cls}">${ico} ${lbl}</span>`
+    +inner
+    +`<button class="sc-block-del" onclick="removeStep(${i})">x</button>`;
+  const h=d.querySelector('[data-si]');
+  h.addEventListener('dragstart',e=>{e.dataTransfer.setData('stepIndex',''+i);e.dataTransfer.effectAllowed='move';});
+  d.addEventListener('dragover',e=>{e.preventDefault();d.style.borderColor='var(--acc)';});
+  d.addEventListener('dragleave',()=>d.style.borderColor='');
+  d.addEventListener('drop',e=>{
+    e.stopPropagation();d.style.borderColor='';
+    const from=parseInt(e.dataTransfer.getData('stepIndex'));
+    if(isNaN(from)||from===i)return;
+    const[m]=scenarios[activeIdx].steps.splice(from,1);
+    scenarios[activeIdx].steps.splice(i,0,m);renderCanvas();
+  });
+  return d;
+}
+
+function updStep(i,key,val){const s=scenarios[activeIdx].steps[i];if(!s)return;s[key]=key==='delay'?parseInt(val)||0:val;}
+function updPump(i,pump){const s=scenarios[activeIdx].steps[i];if(!s)return;s.pump=pump;if(pump)s.topic=PUMP_TOPICS[pump];}
+function updValve(i,valve){const s=scenarios[activeIdx].steps[i];if(!s)return;s.valve=valve;if(valve)s.topic=VALVE_TOPICS[valve];}
+function removeStep(i){scenarios[activeIdx].steps.splice(i,1);renderCanvas();}
+function clearCanvas(){scenarios[activeIdx].steps=[];renderCanvas();}
+
+document.querySelectorAll('.sc-blk[draggable]').forEach(b=>{
+  b.addEventListener('dragstart',e=>{dragType=b.dataset.type;e.dataTransfer.effectAllowed='copy';e.dataTransfer.setData('palette','1');});
+});
+function scDragOver(e){e.preventDefault();document.getElementById('scCanvas').classList.add('over');}
+function scDragLeave(){document.getElementById('scCanvas').classList.remove('over');}
+function scDrop(e){
+  e.preventDefault();document.getElementById('scCanvas').classList.remove('over');
+  if(e.dataTransfer.getData('palette')!=='1'||!dragType)return;
+  const type=dragType;dragType=null;
+  let step={type,delay:0,pump:null,valve:null,topic:'',payload:'1'};
+  if(type==='pumpOn'||type==='pumpOff'){step.pump='A';step.topic=PUMP_TOPICS['A'];step.payload=type==='pumpOn'?'1':'0';}
+  else if(type==='valveOpen'||type==='valveClose'){step.valve=1;step.topic=VALVE_TOPICS[1];step.payload=type==='valveOpen'?'1':'0';}
+  else if(type==='startSeq'){step.topic='water/control/startSequence';}
+  else if(type==='stopSeq'){step.topic='water/control/stopSequence';}
+  else if(type==='resetSeq'){step.topic='water/control/resetSequence';}
+  else if(type==='wait'){step.delay=1000;step.topic='';step.payload='';}
+  else if(type==='custom'){step.topic='water/control/';step.payload='1';}
+  else if(type==='condition'){step.sensor='levelTop';step.operator='>';step.condValue=80;step.timeout=30000;step.topic='';step.payload='';}
+  scenarios[activeIdx].steps.push(step);renderCanvas();
+}
+
+function runScenario(){
+  const sc=scenarios[activeIdx];
+  if(!connected){log('Not connected to MQTT','err');return;}
+  if(!sc.steps.length){log('No steps in scenario','err');return;}
+  log('▶ Scenario: '+sc.name,'info');
+  runScenarioAsync(sc);
+}
+
+async function runScenarioAsync(sc){
+  for(let i=0;i<sc.steps.length;i++){
+    const s=sc.steps[i];
+    if(s.type==='wait'){
+      await new Promise(r=>setTimeout(r,s.delay||1000));
+      continue;
+    }
+    if(s.type==='condition'){
+      const sensor=s.sensor||'levelTop';
+      const op=s.operator||'>';
+      const target=s.condValue??50;
+      const timeout=s.timeout??30000;
+      const label=`[${i+1}] ⚑ Condition: ${sensor} ${op} ${target}`;
+      log(label+' — waiting...','info');
+      const ok=await waitForCondition(sensor,op,target,timeout);
+      if(ok){log(label+' → ✓ met, continuing','ok');}
+      else{log(label+' → ✗ TIMEOUT, scenario aborted','err');return;}
+      continue;
+    }
+    if(s.delay&&s.delay>0) await new Promise(r=>setTimeout(r,s.delay));
+    if(!s.topic){log('['+(i+1)+'] skipped — no topic','err');continue;}
+    sendCmd(s.topic,s.payload||'1');
+  }
+  log('✓ Done: '+sc.name,'ok');
+}
+
+function waitForCondition(sensor,op,target,timeout){
+  return new Promise(resolve=>{
+    const start=Date.now();
+    const SENSOR_MAP={
+      levelTop:()=>parseFloat(lastTelemetry.sensors?.levelTop??NaN),
+      levelBottom:()=>parseFloat(lastTelemetry.sensors?.levelBottom??NaN),
+      flow1:()=>parseFloat(lastTelemetry.sensors?.flow1??NaN),
+      flow2:()=>parseFloat(lastTelemetry.sensors?.flow2??NaN),
+      pressure1:()=>parseFloat(lastTelemetry.sensors?.pressure1??NaN),
+      pressure2:()=>parseFloat(lastTelemetry.sensors?.pressure2??NaN),
+    };
+    const getValue=SENSOR_MAP[sensor]||(()=>NaN);
+    function checkOp(val){
+      if(isNaN(val))return false;
+      if(op==='>')return val>target;
+      if(op==='>=')return val>=target;
+      if(op==='<')return val<target;
+      if(op==='<=')return val<=target;
+      if(op==='==')return Math.abs(val-target)<0.01;
+      return false;
+    }
+    const iv=setInterval(()=>{
+      if(checkOp(getValue())){clearInterval(iv);resolve(true);return;}
+      if(Date.now()-start>=timeout){clearInterval(iv);resolve(false);}
+    },300);
+  });
+}
+
+buildValves();
+renderTabs();
+log('Dashboard ready. Click CONNECT to link to MQTT broker.','info');
+</script>
+
+</body>
+</html>
