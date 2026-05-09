@@ -37,15 +37,22 @@ body{background:transparent;color:var(--txt);font-family:'Courier New',monospace
 .status-open{background:#22c55e22;color:#22c55e;border:1px solid #22c55e55}
 .status-closed{background:#ef444422;color:#ef4444;border:1px solid #ef444455}
 .status-unknown{background:#f59e0b22;color:#f59e0b;border:1px solid #f59e0b55}
+/* Guest mode pump display */
+.pump-status-ro{padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:1px;min-width:65px;text-align:center}
+.pump-item-ro{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--c3);border-radius:6px;padding:8px 10px}
 .btn-grp{display:flex;gap:6px;margin-left:auto}
 .btn{padding:4px 10px;border:1px solid;border-radius:4px;cursor:pointer;font-size:11px;font-weight:700;letter-spacing:1px;transition:all 0.2s;background:transparent;font-family:'Courier New',monospace}
 .btn-on{border-color:var(--ok);color:var(--ok)}.btn-on:hover{background:#22c55e22}
 .btn-off{border-color:var(--danger);color:var(--danger)}.btn-off:hover{background:#ef444422}
 .valve-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .valve-item{background:var(--c3);border-radius:6px;padding:8px;text-align:center}
+.valve-item-ro{background:var(--c3);border-radius:6px;padding:8px;text-align:center;display:flex;align-items:center;justify-content:space-between;gap:8px}
 .valve-name{font-size:10px;color:var(--txt2);letter-spacing:1px;margin-bottom:6px}
+.valve-name-ro{font-size:10px;color:var(--txt2);letter-spacing:1px;font-weight:700}
 .valve-icon{width:32px;height:32px;margin:0 auto 6px;position:relative}
 .valve-icon svg{width:100%;height:100%}
+.valve-icon-ro{width:24px;height:24px;flex-shrink:0;position:relative}
+.valve-icon-ro svg{width:100%;height:100%}
 .valve-btns{display:flex;gap:4px;justify-content:center}
 .vbtn{padding:3px 8px;border:1px solid;border-radius:3px;cursor:pointer;font-size:10px;font-weight:700;background:transparent;font-family:'Courier New',monospace;transition:all 0.2s}
 .vbtn-o{border-color:var(--ok);color:var(--ok)}.vbtn-o:hover{background:#22c55e22}
@@ -54,6 +61,7 @@ body{background:transparent;color:var(--txt);font-family:'Courier New',monospace
 .log-entry{padding:1px 0;color:var(--txt2)}
 .log-entry.ok{color:var(--ok)}.log-entry.err{color:var(--danger)}.log-entry.info{color:var(--acc)}
 .mqtt-bar{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--c1);border-radius:6px;border:1px solid var(--c4);margin-bottom:10px}
+.mqtt-bar-guest{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--c1);border-radius:6px;border:1px solid var(--c4);margin-bottom:10px}
 .mqtt-dot{width:8px;height:8px;border-radius:50%;background:var(--danger);transition:background 0.3s}
 .mqtt-dot.connected{background:var(--ok);box-shadow:0 0 6px var(--ok)}
 .mqtt-label{font-size:11px;color:var(--txt2);flex:1}
@@ -70,6 +78,18 @@ body{background:transparent;color:var(--txt);font-family:'Courier New',monospace
 .seq-stop{border-color:var(--warn);color:var(--warn);background:transparent}.seq-stop:hover{background:#f59e0b22}
 .seq-reset{border-color:var(--txt2);color:var(--txt2);background:transparent}.seq-reset:hover{background:#ffffff11}
 .sub-label{font-size:10px;color:var(--txt2);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;margin-top:10px}
+
+/* Mode Toggle Styles */
+.mode-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;background:var(--c1);border-radius:8px;border:1px solid var(--c4);margin-bottom:10px}
+.mode-label{font-size:11px;color:var(--txt2);letter-spacing:1px;text-transform:uppercase;font-weight:700}
+.mode-toggle{display:flex;align-items:center;gap:8px;background:var(--c3);border-radius:20px;padding:3px;border:1px solid var(--c4)}
+.mode-btn{padding:5px 14px;border-radius:17px;border:none;cursor:pointer;font-size:11px;font-weight:700;letter-spacing:1px;font-family:'Courier New',monospace;transition:all 0.25s;background:transparent;color:var(--txt2)}
+.mode-btn.active{background:var(--acc);color:var(--c1);box-shadow:0 0 8px #00c9a744}
+.guest-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:1px;background:#f59e0b22;color:var(--warn);border:1px solid #f59e0b44}
+.guest-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--warn);display:inline-block}
+.operator-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:1px;background:#22c55e22;color:var(--ok);border:1px solid #22c55e44}
+.operator-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--ok);display:inline-block}
+.guest-notice{padding:8px 12px;background:#f59e0b10;border:1px solid #f59e0b33;border-radius:6px;font-size:11px;color:var(--warn);text-align:center;letter-spacing:1px;margin-top:8px}
 
 /* scenario builder */
 .sc-tabs-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:8px}
@@ -192,23 +212,95 @@ body{background:transparent;color:var(--txt);font-family:'Courier New',monospace
   .sc-block-del { margin-left: auto; }
   .log-box { height: 120px; font-size: 12px; }
   .send-btn { padding: 7px 16px; }
+  .mode-bar { flex-wrap: wrap; gap: 8px; }
+  .mode-label { flex: 1 1 auto; }
+  .valve-item-ro { padding: 10px 12px; flex-wrap: wrap; }
+  /* Guest mobile styles */
+  .pump-item-ro { flex-wrap: wrap; gap: 6px; padding: 10px 12px; }
+  .mqtt-bar-guest { flex-wrap: wrap; gap: 6px; }
+  .mqtt-bar-guest .mqtt-label { min-width: 0; flex: 1 1 100%; order: -1; }
+  .mqtt-bar-guest .mqtt-server { flex: 1 1 auto; }
+  .valve-icon-ro { width: 28px; height: 28px; }
+  .valve-item-ro .pump-status-ro { font-size: 11px; padding: 4px 10px; }
 }
 @media (min-width: 480px) and (max-width: 768px) {
   .valve-grid { grid-template-columns: repeat(4, 1fr); }
   .sensor-grid { grid-template-columns: repeat(3, 1fr); }
 }
 
+/* Guest view responsive fixes */
+@media (max-width: 768px) {
+  .pump-item-ro .pump-name { width: auto; flex: 1 1 auto; }
+}
+
+
+/* Password modal */
+.pw-overlay{display:none;position:fixed;inset:0;background:#00000088;z-index:1000;align-items:center;justify-content:center}
+.pw-overlay.show{display:flex}
+.pw-box{background:var(--c2);border:1px solid var(--acc);border-radius:10px;padding:24px 28px;width:300px;max-width:90vw;box-shadow:0 0 30px #00c9a722;font-family:'Courier New',monospace}
+.pw-title{font-size:12px;font-weight:700;letter-spacing:2px;color:var(--acc);margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.pw-title::before{content:'';width:6px;height:6px;background:var(--acc);border-radius:50%;box-shadow:0 0 6px var(--acc)}
+.pw-subtitle{font-size:10px;color:var(--txt2);letter-spacing:1px;margin-bottom:16px}
+.pw-input{width:100%;background:var(--c1);border:1px solid var(--c4);border-radius:5px;padding:9px 12px;font-size:14px;color:var(--txt);font-family:'Courier New',monospace;letter-spacing:3px;margin-bottom:6px}
+.pw-input:focus{outline:none;border-color:var(--acc)}
+.pw-error{font-size:10px;color:var(--danger);letter-spacing:1px;min-height:16px;margin-bottom:10px}
+.pw-btns{display:flex;gap:8px}
+.pw-confirm{flex:1;padding:8px;border:1px solid var(--ok);border-radius:5px;background:transparent;color:var(--ok);cursor:pointer;font-size:11px;font-weight:700;font-family:'Courier New',monospace;letter-spacing:1px}
+.pw-confirm:hover{background:#22c55e18}
+.pw-cancel{flex:1;padding:8px;border:1px solid var(--c4);border-radius:5px;background:transparent;color:var(--txt2);cursor:pointer;font-size:11px;font-weight:700;font-family:'Courier New',monospace}
+.pw-cancel:hover{background:#ffffff08}
+
 </style>
 
 <div class="dash">
 
+<!-- PASSWORD MODAL -->
+<div class="pw-overlay" id="pwOverlay">
+  <div class="pw-box">
+    <div class="pw-title">OPERATOR ACCESS</div>
+    <div class="pw-subtitle">ENTER PASSWORD TO CONTINUE</div>
+    <input class="pw-input" type="password" id="pwInput" placeholder="••••••••"
+      onkeydown="if(event.key==='Enter')confirmPassword();"/>
+    <div class="pw-error" id="pwError"></div>
+    <div class="pw-btns">
+      <button class="pw-confirm" onclick="confirmPassword()">CONFIRM</button>
+      <button class="pw-cancel" onclick="cancelPassword()">CANCEL</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- MODE TOGGLE BAR -->
+<div class="panel full-width">
+  <div class="mode-bar">
+    <span class="mode-label">Access Mode</span>
+    <div class="mode-toggle">
+      <button class="mode-btn active" id="modeGuest" onclick="setMode('guest')">GUEST</button>
+      <button class="mode-btn" id="modeOperator" onclick="requestOperator()">OPERATOR</button>
+    </div>
+    <span class="guest-badge" id="modeBadge">View Only</span>
+  </div>
+  <div class="guest-notice" id="guestNotice" style="display:block">
+    Guest View — Monitoring Only. Controls are disabled.
+  </div>
+</div>
+
 <!-- MQTT BAR -->
 <div class="panel full-width">
-  <div class="mqtt-bar">
+  <!-- Operator MQTT bar with connect button -->
+  <div class="mqtt-bar" id="mqttBarOperator" style="display:none">
     <div class="mqtt-dot" id="mqttDot"></div>
     <span class="mqtt-label" id="mqttLabel">Disconnected — broker.hivemq.com:1883</span>
     <span class="mqtt-server">water/system/telemetry</span>
     <button class="send-btn" id="connectBtn" onclick="toggleMqtt()">CONNECT</button>
+  </div>
+  <!-- Guest MQTT bar - with connect button for viewing data -->
+  <div class="mqtt-bar-guest" id="mqttBarGuest" style="display:flex">
+    <div class="mqtt-dot" id="mqttDotGuest"></div>
+    <span class="mqtt-label" id="mqttLabelGuest">Disconnected — broker.hivemq.com:1883</span>
+    <span class="mqtt-server">water/system/telemetry</span>
+    <button class="send-btn" id="connectBtnGuest" onclick="toggleMqtt()">CONNECT</button>
+    <span style="font-size:10px;color:var(--txt2);letter-spacing:1px;background:var(--c3);padding:3px 10px;border-radius:4px;border:1px solid var(--c4);flex-shrink:0">READ-ONLY</span>
   </div>
 </div>
 
@@ -219,12 +311,12 @@ body{background:transparent;color:var(--txt);font-family:'Courier New',monospace
     <div class="tank-wrap">
       <div class="tank-outer"><div class="tank-fill" id="fillDown" style="height:50%"></div></div>
       <div class="tank-pct" id="pctDown">50%</div>
-      <div class="tank-name">DownTank</div>
+      <div class="tank-name">DownTank (max 22cm)</div>
     </div>
     <div class="tank-wrap">
       <div class="tank-outer"><div class="tank-fill" id="fillUp" style="height:20%"></div></div>
       <div class="tank-pct" id="pctUp">20%</div>
-      <div class="tank-name">UpTank</div>
+      <div class="tank-name">UpTank (max 32cm)</div>
     </div>
   </div>
   <div class="sub-label">Flow &amp; Pressure</div>
@@ -238,8 +330,8 @@ body{background:transparent;color:var(--txt);font-family:'Courier New',monospace
   </div>
 </div>
 
-<!-- PUMPS -->
-<div class="panel">
+<!-- PUMPS - Operator View -->
+<div class="panel" id="pumpsOperator" style="display:none">
   <div class="panel-title">Pumps</div>
   <div class="pump-row">
     <div class="pump-item">
@@ -269,20 +361,60 @@ body{background:transparent;color:var(--txt);font-family:'Courier New',monospace
   </div>
   <div class="sub-label" style="margin-top:12px">Sequence Control</div>
   <div class="seq-btns">
-    <button class="seq-btn seq-start" onclick="sendCmd('water/control/startSequence','1')">▶ START SEQ</button>
-    <button class="seq-btn seq-stop" onclick="sendCmd('water/control/stopSequence','1')">■ STOP SEQ</button>
-    <button class="seq-btn seq-reset" onclick="sendCmd('water/control/resetSequence','1')">↺ RESET</button>
+    <button class="seq-btn seq-start" onclick="sendCmd('water/control/startSequence','1')">&#9654; START SEQ</button>
+    <button class="seq-btn seq-stop" onclick="sendCmd('water/control/stopSequence','1')">&#9632; STOP SEQ</button>
+    <button class="seq-btn seq-reset" onclick="sendCmd('water/control/resetSequence','1')">&#x21BA; RESET</button>
   </div>
 </div>
 
-<!-- VALVES -->
-<div class="panel full-width">
+<!-- PUMPS - Guest Read-Only View -->
+<div class="panel" id="pumpsGuest">
+  <div class="panel-title">Pumps Status</div>
+  <div class="pump-row">
+    <div class="pump-item-ro">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="pump-name" style="margin:0">PUMP A</div>
+        <span class="badge badge-vfd">Cont</span>
+      </div>
+      <div class="pump-status-ro status-unknown" id="stPumpAGuest">UNKNOWN</div>
+    </div>
+    <div class="pump-item-ro">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="pump-name" style="margin:0">PUMP B</div>
+        <span class="badge badge-dol">SOFT</span>
+      </div>
+      <div class="pump-status-ro status-unknown" id="stPumpBGuest">UNKNOWN</div>
+    </div>
+    <div class="pump-item-ro">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="pump-name" style="margin:0">PUMP C</div>
+        <span class="badge badge-soft">VFD</span>
+      </div>
+      <div class="pump-status-ro status-unknown" id="stPumpCGuest">UNKNOWN</div>
+    </div>
+  </div>
+  <div class="guest-notice" style="margin-top:10px">
+    Command controls are restricted to operators only.
+  </div>
+</div>
+
+<!-- VALVES - Operator View -->
+<div class="panel full-width" id="valvesOperator" style="display:none">
   <div class="panel-title">Valves</div>
   <div class="valve-grid" id="valveGrid"></div>
 </div>
 
-<!-- SCENARIO BUILDER -->
-<div class="panel full-width">
+<!-- VALVES - Guest Read-Only View -->
+<div class="panel full-width" id="valvesGuest">
+  <div class="panel-title">Valves Status</div>
+  <div class="valve-grid" id="valveGridGuest"></div>
+  <div class="guest-notice" style="margin-top:8px">
+    Valve controls are restricted to operators only.
+  </div>
+</div>
+
+<!-- SCENARIO BUILDER - Operator Only -->
+<div class="panel full-width" id="scenariosPanel" style="display:none">
   <div class="panel-title">Scenarios</div>
   <div class="sc-tabs-row" id="scTabs"></div>
   <div class="sc-namebar">
@@ -293,28 +425,28 @@ body{background:transparent;color:var(--txt);font-family:'Courier New',monospace
   <div class="sc-builder-wrap">
     <div class="sc-palette">
       <div class="sc-palette-title">Pumps</div>
-      <div class="sc-blk pump" draggable="true" data-type="pumpOn">⚡ Pump ON</div>
-      <div class="sc-blk pump" draggable="true" data-type="pumpOff">○ Pump OFF</div>
+      <div class="sc-blk pump" draggable="true" data-type="pumpOn">&#9889; Pump ON</div>
+      <div class="sc-blk pump" draggable="true" data-type="pumpOff">&#9675; Pump OFF</div>
       <div class="sc-palette-title">Valves</div>
-      <div class="sc-blk valve" draggable="true" data-type="valveOpen">⊕ Valve OPEN</div>
-      <div class="sc-blk valve" draggable="true" data-type="valveClose">⊗ Valve CLOSE</div>
+      <div class="sc-blk valve" draggable="true" data-type="valveOpen">&#8853; Valve OPEN</div>
+      <div class="sc-blk valve" draggable="true" data-type="valveClose">&#8855; Valve CLOSE</div>
       <div class="sc-palette-title">Sequence</div>
-      <div class="sc-blk seq" draggable="true" data-type="startSeq">▶ Start SEQ</div>
-      <div class="sc-blk seq" draggable="true" data-type="stopSeq">■ Stop SEQ</div>
-      <div class="sc-blk seq" draggable="true" data-type="resetSeq">↺ Reset SEQ</div>
+      <div class="sc-blk seq" draggable="true" data-type="startSeq">&#9654; Start SEQ</div>
+      <div class="sc-blk seq" draggable="true" data-type="stopSeq">&#9632; Stop SEQ</div>
+      <div class="sc-blk seq" draggable="true" data-type="resetSeq">&#x21BA; Reset SEQ</div>
       <div class="sc-palette-title">Timing</div>
-      <div class="sc-blk wait" draggable="true" data-type="wait">⏱ Wait</div>
+      <div class="sc-blk wait" draggable="true" data-type="wait">&#9201; Wait</div>
       <div class="sc-palette-title">Custom</div>
-      <div class="sc-blk custom" draggable="true" data-type="custom">✎ Custom MSG</div>
+      <div class="sc-blk custom" draggable="true" data-type="custom">&#9998; Custom MSG</div>
       <div class="sc-palette-title">Condition</div>
-      <div class="sc-blk cond" draggable="true" data-type="condition">⚑ Condition</div>
+      <div class="sc-blk cond" draggable="true" data-type="condition">&#9873; Condition</div>
     </div>
     <div class="sc-canvas" id="scCanvas" ondragover="scDragOver(event)" ondrop="scDrop(event)" ondragleave="scDragLeave()">
       <div class="sc-canvas-hint" id="scHint">Drag blocks here<br>to build your scenario</div>
     </div>
   </div>
   <div class="sc-footer">
-    <button class="sc-run-btn" onclick="runScenario()">▶ RUN SCENARIO</button>
+    <button class="sc-run-btn" onclick="runScenario()">&#9654; RUN SCENARIO</button>
     <button class="sc-clr-btn" onclick="clearCanvas()">CLEAR</button>
   </div>
 
@@ -328,9 +460,9 @@ body{background:transparent;color:var(--txt);font-family:'Courier New',monospace
       <input class="rec-freq-in" id="recFreq" type="number" min="100" max="60000" step="100" value="500"/>
       <span class="rec-freq-lbl">ms</span>
     </div>
-    <button class="rec-btn rec-start" id="recStartBtn" onclick="startRecording()">⏺ RECORD</button>
-    <button class="rec-btn rec-stop" id="recStopBtn" onclick="stopRecording()" style="display:none">⏹ STOP</button>
-    <button class="rec-btn rec-dl" id="recDlBtn" onclick="downloadExcel()" disabled>⬇ EXPORT XLSX</button>
+    <button class="rec-btn rec-start" id="recStartBtn" onclick="startRecording()">&#9210; RECORD</button>
+    <button class="rec-btn rec-stop" id="recStopBtn" onclick="stopRecording()" style="display:none">&#9632; STOP</button>
+    <button class="rec-btn rec-dl" id="recDlBtn" onclick="downloadExcel()" disabled>&#11015; EXPORT XLSX</button>
   </div>
 </div>
 
@@ -345,6 +477,96 @@ body{background:transparent;color:var(--txt);font-family:'Courier New',monospace
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/4.3.7/mqtt.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
+// ── MODE MANAGEMENT ──
+let currentMode = 'guest'; // 'operator' or 'guest' - default is guest (read-only)
+
+function requestOperator() {
+  // Already operator, no need to prompt
+  if (currentMode === 'operator') return;
+  const overlay = document.getElementById('pwOverlay');
+  const input = document.getElementById('pwInput');
+  const err = document.getElementById('pwError');
+  input.value = '';
+  err.textContent = '';
+  overlay.classList.add('show');
+  setTimeout(() => input.focus(), 50);
+}
+
+function confirmPassword() {
+  const input = document.getElementById('pwInput');
+  const err = document.getElementById('pwError');
+  if (input.value === 'Siemens') {
+    document.getElementById('pwOverlay').classList.remove('show');
+    setMode('operator');
+  } else {
+    err.textContent = 'INCORRECT PASSWORD';
+    input.value = '';
+    input.focus();
+    // shake animation
+    input.style.borderColor = 'var(--danger)';
+    setTimeout(() => { input.style.borderColor = ''; }, 1000);
+  }
+}
+
+function cancelPassword() {
+  document.getElementById('pwOverlay').classList.remove('show');
+  document.getElementById('pwError').textContent = '';
+  // ensure guest stays active
+  document.getElementById('modeGuest').classList.add('active');
+  document.getElementById('modeOperator').classList.remove('active');
+}
+
+function setMode(mode) {
+  currentMode = mode;
+  const opBtn = document.getElementById('modeOperator');
+  const guestBtn = document.getElementById('modeGuest');
+  const badge = document.getElementById('modeBadge');
+  const notice = document.getElementById('guestNotice');
+
+  // Operator view elements
+  const mqttBarOp = document.getElementById('mqttBarOperator');
+  const mqttBarGuest = document.getElementById('mqttBarGuest');
+  const pumpsOp = document.getElementById('pumpsOperator');
+  const pumpsGuest = document.getElementById('pumpsGuest');
+  const valvesOp = document.getElementById('valvesOperator');
+  const valvesGuest = document.getElementById('valvesGuest');
+  const scenariosPanel = document.getElementById('scenariosPanel');
+
+  if (mode === 'operator') {
+    opBtn.classList.add('active');
+    guestBtn.classList.remove('active');
+    badge.className = 'operator-badge';
+    badge.textContent = 'Full Control';
+    notice.style.display = 'none';
+
+    mqttBarOp.style.display = 'flex';
+    mqttBarGuest.style.display = 'none';
+    pumpsOp.style.display = '';
+    pumpsGuest.style.display = 'none';
+    valvesOp.style.display = '';
+    valvesGuest.style.display = 'none';
+    scenariosPanel.style.display = '';
+
+    log('Switched to OPERATOR mode — full control enabled', 'ok');
+  } else {
+    opBtn.classList.remove('active');
+    guestBtn.classList.add('active');
+    badge.className = 'guest-badge';
+    badge.textContent = 'View Only';
+    notice.style.display = 'block';
+
+    mqttBarOp.style.display = 'none';
+    mqttBarGuest.style.display = 'flex';
+    pumpsOp.style.display = 'none';
+    pumpsGuest.style.display = '';
+    valvesOp.style.display = 'none';
+    valvesGuest.style.display = '';
+    scenariosPanel.style.display = 'none';
+
+    log('Switched to GUEST mode — monitoring only', 'info');
+  }
+}
+
 // ── MQTT ──
 let client=null,connected=false;
 const BROKER='wss://broker.hivemq.com:8884/mqtt';
@@ -365,6 +587,11 @@ function setMqttStatus(ok,msg){
   document.getElementById('mqttDot').className='mqtt-dot'+(ok?' connected':'');
   document.getElementById('mqttLabel').innerHTML=(ok?'Connected — ':'Disconnected — ')+msg;
   document.getElementById('connectBtn').textContent=ok?'DISCONNECT':'CONNECT';
+  // Also update guest bar
+  document.getElementById('mqttDotGuest').className='mqtt-dot'+(ok?' connected':'');
+  document.getElementById('mqttLabelGuest').innerHTML=(ok?'Connected — ':'Disconnected — ')+msg;
+  const guestBtn = document.getElementById('connectBtnGuest');
+  if(guestBtn) guestBtn.textContent = ok?'DISCONNECT':'CONNECT';
   connected=ok;
 }
 
@@ -382,12 +609,16 @@ function toggleMqtt(){
     client.on('message',(topic,payload)=>{
       const msg=payload.toString();
       if(topic==='water/system/telemetry'){try{parseTelemetry(JSON.parse(msg));}catch(e){}}
-      else{log('← '+topic+': '+msg,'info');}
+      else{log('&#8592; '+topic+': '+msg,'info');}
     });
     client.on('error',e=>{log('Error: '+e.message,'err');setMqttStatus(false,'broker.hivemq.com');});
     client.on('close',()=>{setMqttStatus(false,'broker.hivemq.com:1883');log('Disconnected','err');});
   }catch(e){log('Failed: '+e.message,'err');}
 }
+
+// ── TANK MAX HEIGHTS ──
+const UP_TANK_MAX_CM = 32;
+const DOWN_TANK_MAX_CM = 22;
 
 function parseTelemetry(d){
   lastTelemetry=d;
@@ -396,18 +627,51 @@ function parseTelemetry(d){
   set('sFlow1',s.flow1);set('sFlow2',s.flow2);
   set('sP1',s.pressure1);set('sP2',s.pressure2);
   set('sTop',s.levelTop);set('sBot',s.levelBottom);
-  const top=parseFloat(s.levelTop)||0,bot=parseFloat(s.levelBottom)||0;
-  document.getElementById('fillUp').style.height=Math.min(100,Math.max(0,top))+'%';
-  document.getElementById('pctUp').textContent=(top).toFixed(2)+' cm';
-  document.getElementById('fillDown').style.height=Math.min(100,Math.max(0,bot))+'%';
-  document.getElementById('pctDown').textContent=(bot).toFixed(2)+' cm';
-  if(d.pumps){setPump('stPumpA',d.pumps.pumpA);setPump('stPumpB',d.pumps.pumpB);setPump('stPumpC',d.pumps.pumpC);}
-  if(d.valves){for(let i=1;i<=8;i++){const v=d.valves['valve'+i];if(v)setValveStatus(i,v);}}
+
+  // Tank fill percentage based on max heights
+  const top=parseFloat(s.levelTop)||0;
+  const bot=parseFloat(s.levelBottom)||0;
+
+  // UpTank: max 32cm, DownTank: max 22cm
+  const upPct = Math.min(100, Math.max(0, (top / UP_TANK_MAX_CM) * 100));
+  const downPct = Math.min(100, Math.max(0, (bot / DOWN_TANK_MAX_CM) * 100));
+
+  document.getElementById('fillUp').style.height = upPct + '%';
+  document.getElementById('pctUp').textContent = top.toFixed(2) + ' cm (' + upPct.toFixed(1) + '%)';
+  document.getElementById('fillDown').style.height = downPct + '%';
+  document.getElementById('pctDown').textContent = bot.toFixed(2) + ' cm (' + downPct.toFixed(1) + '%)';
+
+  if(d.pumps){
+    setPump('stPumpA',d.pumps.pumpA);
+    setPump('stPumpB',d.pumps.pumpB);
+    setPump('stPumpC',d.pumps.pumpC);
+    // Also update guest view
+    setPumpGuest('stPumpAGuest',d.pumps.pumpA);
+    setPumpGuest('stPumpBGuest',d.pumps.pumpB);
+    setPumpGuest('stPumpCGuest',d.pumps.pumpC);
+  }
+  if(d.valves){
+    for(let i=1;i<=8;i++){
+      const v=d.valves['valve'+i];
+      if(v){
+        setValveStatus(i,v);
+        setValveStatusGuest(i,v);
+      }
+    }
+  }
 }
 
 function setPump(id,status){
   const el=document.getElementById(id);if(!el)return;
   el.textContent=status;el.className='pump-status';
+  if(status==='OPEN')el.classList.add('status-open');
+  else if(status==='CLOSED')el.classList.add('status-closed');
+  else el.classList.add('status-unknown');
+}
+
+function setPumpGuest(id,status){
+  const el=document.getElementById(id);if(!el)return;
+  el.textContent=status;el.className='pump-status-ro';
   if(status==='OPEN')el.classList.add('status-open');
   else if(status==='CLOSED')el.classList.add('status-closed');
   else el.classList.add('status-unknown');
@@ -421,14 +685,28 @@ function setValveStatus(i,status){
   else el.classList.add('status-unknown');
 }
 
+function setValveStatusGuest(i,status){
+  const el=document.getElementById('vstatusGuest'+i);if(!el)return;
+  el.className='pump-status-ro';el.textContent=status;
+  if(status==='OPEN')el.classList.add('status-open');
+  else if(status==='CLOSED')el.classList.add('status-closed');
+  else el.classList.add('status-unknown');
+}
+
 function sendCmd(topic,payload){
+  // Block commands in guest mode
+  if(currentMode === 'guest'){
+    log('Command blocked — Guest mode is read-only','err');
+    return;
+  }
   if(!connected){log('Not connected to MQTT','err');return;}
   client.publish(topic,payload);
-  log('→ '+topic+': '+payload,'ok');
+  log('&#8594; '+topic+': '+payload,'ok');
 }
 
 // ── VALVES ──
 function buildValves(){
+  // Operator valves with controls
   const g=document.getElementById('valveGrid');
   for(let i=1;i<=8;i++){
     const d=document.createElement('div');d.className='valve-item';
@@ -438,12 +716,28 @@ function buildValves(){
 <circle cx="16" cy="16" r="5" fill="#1a2535" stroke="#00c9a7" stroke-width="1.2"/>
 <rect x="14.5" y="4" width="3" height="7" rx="1" fill="#00c9a7"/>
 </svg></div>
-<div class="pump-status status-unknown" id="vstatus${i}" style="font-size:10px;padding:2px 6px;margin-bottom:6px">—</div>
+<div class="pump-status status-unknown" id="vstatus${i}" style="font-size:10px;padding:2px 6px;margin-bottom:6px">&#8212;</div>
 <div class="valve-btns">
 <button class="vbtn vbtn-o" onclick="sendCmd('water/control/valve${i}','1')">OPEN</button>
 <button class="vbtn vbtn-c" onclick="sendCmd('water/control/valve${i}','0')">CLOSE</button>
 </div>`;
     g.appendChild(d);
+  }
+
+  // Guest valves - read only
+  const gg=document.getElementById('valveGridGuest');
+  for(let i=1;i<=8;i++){
+    const d=document.createElement('div');d.className='valve-item-ro';
+    d.innerHTML=`<div style="display:flex;align-items:center;gap:8px">
+<div class="valve-name-ro">VALVE ${i}</div>
+<div class="valve-icon-ro"><svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect x="4" y="13" width="24" height="6" rx="2" fill="#2e3d50" stroke="#00c9a7" stroke-width="1.2"/>
+<circle cx="16" cy="16" r="5" fill="#1a2535" stroke="#00c9a7" stroke-width="1.2"/>
+<rect x="14.5" y="4" width="3" height="7" rx="1" fill="#00c9a7"/>
+</svg></div>
+</div>
+<div class="pump-status-ro status-unknown" id="vstatusGuest${i}">&#8212;</div>`;
+    gg.appendChild(d);
   }
 }
 
@@ -461,7 +755,7 @@ function startRecording(){
   document.getElementById('recStopBtn').style.display='';
   document.getElementById('recDlBtn').disabled=true;
   document.getElementById('recFreq').disabled=true;
-  log('⏺ Recording started — every '+freqVal+' ms','info');
+  log('&#9210; Recording started — every '+freqVal+' ms','info');
   recInterval=setInterval(()=>{
     const s=lastTelemetry.sensors||{};
     const p=lastTelemetry.pumps||{};
@@ -487,7 +781,7 @@ function stopRecording(){
   document.getElementById('recStopBtn').style.display='none';
   document.getElementById('recDlBtn').disabled=recRows.length===0;
   document.getElementById('recFreq').disabled=false;
-  log('⏹ Recording stopped — '+recRows.length+' rows captured','ok');
+  log('&#9632; Recording stopped — '+recRows.length+' rows captured','ok');
 }
 
 function updateRecCount(){
@@ -503,7 +797,7 @@ function downloadExcel(){
   XLSX.utils.book_append_sheet(wb,ws,'Data');
   const fname='scenario_'+recScenarioName.replace(/[^a-z0-9]/gi,'_')+'_'+new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')+'.xlsx';
   XLSX.writeFile(wb,fname);
-  log('⬇ Exported '+recRows.length+' rows → '+fname,'ok');
+  log('&#11015; Exported '+recRows.length+' rows &#8594; '+fname,'ok');
 }
 
 // ── SCENARIO BUILDER ──
@@ -511,7 +805,7 @@ const PUMP_TOPICS={A:'water/control/pumpA',B:'water/control/pumpB',C:'water/cont
 const VALVE_TOPICS={1:'water/control/valve1',2:'water/control/valve2',3:'water/control/valve3',4:'water/control/valve4',5:'water/control/valve5',6:'water/control/valve6',7:'water/control/valve7',8:'water/control/valve8'};
 const BLK_LABEL={pumpOn:'Pump ON',pumpOff:'Pump OFF',valveOpen:'Valve OPEN',valveClose:'Valve CLOSE',startSeq:'Start SEQ',stopSeq:'Stop SEQ',resetSeq:'Reset SEQ',wait:'Wait',custom:'Custom MSG',condition:'Condition'};
 const BLK_CLS={pumpOn:'pump',pumpOff:'pump',valveOpen:'valve',valveClose:'valve',startSeq:'seq',stopSeq:'seq',resetSeq:'seq',wait:'wait',custom:'custom',condition:'cond'};
-const BLK_ICO={pumpOn:'⚡',pumpOff:'○',valveOpen:'⊕',valveClose:'⊗',startSeq:'▶',stopSeq:'■',resetSeq:'↺',wait:'⏱',custom:'✎',condition:'⚑'};
+const BLK_ICO={pumpOn:'&#9889;',pumpOff:'&#9675;',valveOpen:'&#8853;',valveClose:'&#8855;',startSeq:'&#9654;',stopSeq:'&#9632;',resetSeq:'&#x21BA;',wait:'&#9201;',custom:'&#9998;',condition:'&#9873;'};
 
 let scenarios=[
   {name:'Normal Start',steps:[{type:'startSeq',pump:null,valve:null,delay:0,topic:'water/control/startSequence',payload:'1'}]},
@@ -550,7 +844,7 @@ function makeBlock(step,i){
   const d=document.createElement('div');d.className='sc-block';
   const cls=BLK_CLS[step.type]||'custom';
   const lbl=BLK_LABEL[step.type]||step.type;
-  const ico=BLK_ICO[step.type]||'✎';
+  const ico=BLK_ICO[step.type]||'&#9998;';
   let inner='';
   if(step.type==='pumpOn'||step.type==='pumpOff'){
     const opts=['A','B','C'].map(p=>`<option value="${p}"${step.pump===p?' selected':''}>Pump ${p}</option>`).join('');
@@ -584,7 +878,7 @@ function makeBlock(step,i){
   } else {
     inner=`<span class="sc-dlbl">delay:</span><input class="sc-in delay" value="${step.delay||0}" onchange="updStep(${i},'delay',this.value)"/><span class="sc-dlbl">ms</span>`;
   }
-  d.innerHTML=`<span class="sc-block-handle" draggable="true" data-si="${i}">⠿</span>`
+  d.innerHTML=`<span class="sc-block-handle" draggable="true" data-si="${i}">&#x2807;</span>`
     +`<span class="sc-block-tag ${cls}">${ico} ${lbl}</span>`
     +inner
     +`<button class="sc-block-del" onclick="removeStep(${i})">x</button>`;
@@ -630,10 +924,11 @@ function scDrop(e){
 }
 
 function runScenario(){
+  if(currentMode === 'guest'){log('Scenario execution blocked — Guest mode is read-only','err');return;}
   const sc=scenarios[activeIdx];
   if(!connected){log('Not connected to MQTT','err');return;}
   if(!sc.steps.length){log('No steps in scenario','err');return;}
-  log('▶ Scenario: '+sc.name,'info');
+  log('&#9654; Scenario: '+sc.name,'info');
   runScenarioAsync(sc);
 }
 
@@ -649,18 +944,18 @@ async function runScenarioAsync(sc){
       const op=s.operator||'>';
       const target=s.condValue??50;
       const timeout=s.timeout??30000;
-      const label=`[${i+1}] ⚑ Condition: ${sensor} ${op} ${target}`;
+      const label=`[${i+1}] &#9873; Condition: ${sensor} ${op} ${target}`;
       log(label+' — waiting...','info');
       const ok=await waitForCondition(sensor,op,target,timeout);
-      if(ok){log(label+' → ✓ met, continuing','ok');}
-      else{log(label+' → ✗ TIMEOUT, scenario aborted','err');return;}
+      if(ok){log(label+' &#8594; &#10003; met, continuing','ok');}
+      else{log(label+' &#8594; &#10007; TIMEOUT, scenario aborted','err');return;}
       continue;
     }
     if(s.delay&&s.delay>0) await new Promise(r=>setTimeout(r,s.delay));
     if(!s.topic){log('['+(i+1)+'] skipped — no topic','err');continue;}
     sendCmd(s.topic,s.payload||'1');
   }
-  log('✓ Done: '+sc.name,'ok');
+  log('&#10003; Done: '+sc.name,'ok');
 }
 
 function waitForCondition(sensor,op,target,timeout){
