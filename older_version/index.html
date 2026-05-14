@@ -1,14 +1,11 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=5.0, user-scalable=yes"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="screen-orientation" content="any"/>
-<meta name="x5-orientation" content="landscape|portrait"/>
 <title>Water System Control</title>
 </head>
 <body>
@@ -16,7 +13,7 @@
 <style>
 :root{--c1:#0f1923;--c2:#1a2535;--c3:#243040;--c4:#2e3d50;--acc:#00c9a7;--acc2:#0096ff;--warn:#f59e0b;--danger:#ef4444;--ok:#22c55e;--txt:#e2e8f0;--txt2:#94a3b8;--border:#2e3d50}
 *{box-sizing:border-box;margin:0;padding:0}
-html{background:#0a1628}body{background:linear-gradient(135deg,#0a1628,#0f1f35);min-height:100vh;color:var(--txt);font-family:'Courier New',monospace;font-size:13px}
+body{background:transparent;color:var(--txt);font-family:'Courier New',monospace;font-size:13px}
 .dash{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px;background:linear-gradient(135deg,#0a1628,#0f1f35)}
 .panel{background:var(--c2);border:1px solid var(--c4);border-radius:8px;padding:12px}
 .panel-title{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--acc);margin-bottom:12px;border-bottom:1px solid var(--c4);padding-bottom:8px;display:flex;align-items:center;gap:6px}
@@ -237,30 +234,6 @@ html{background:#0a1628}body{background:linear-gradient(135deg,#0a1628,#0f1f35);
 }
 
 
-/* ── PROCESS VIEW TAB BAR ── */
-.pv-tab-bar{display:flex;gap:0;border-bottom:2px solid var(--c4);margin-bottom:12px}
-.pv-tab{padding:6px 16px;cursor:pointer;font-size:10px;font-weight:700;letter-spacing:2px;color:var(--txt2);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;font-family:'Courier New',monospace;background:transparent;border-top:none;border-left:none;border-right:none}
-.pv-tab.active{color:var(--acc);border-bottom-color:var(--acc)}
-.pv-pane{display:none}.pv-pane.active{display:block}
-
-/* ── SCADA SVG PANEL ── */
-.scada-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;background:#0f1923;border-radius:6px}
-.scada-svg{display:block;margin:0 auto;max-width:100%;min-width:340px;background:#0f1923;border-radius:6px}
-
-/* sensor readout boxes on scada */
-.scada-box{font-family:'Courier New',monospace;font-size:11px;font-weight:700}
-.scada-val{font-size:13px;font-weight:700;fill:var(--acc)}
-
-/* pipe highlight classes — toggled by JS */
-.pipe-active{stroke:#0096ff !important;filter:drop-shadow(0 0 3px #0096ff88)}
-.pipe-idle{stroke:#2e3d50}
-
-/* click cursor on interactive elements */
-.scada-interactive{cursor:pointer}
-
-/* tooltip */
-.scada-tooltip{position:absolute;background:var(--c2);border:1px solid var(--acc);border-radius:5px;padding:5px 10px;font-size:10px;font-family:'Courier New',monospace;color:var(--txt);pointer-events:none;display:none;z-index:100;letter-spacing:1px;white-space:nowrap}
-
 /* Password modal */
 .pw-overlay{display:none;position:fixed;inset:0;background:#00000088;z-index:1000;align-items:center;justify-content:center}
 .pw-overlay.show{display:flex}
@@ -276,17 +249,6 @@ html{background:#0a1628}body{background:linear-gradient(135deg,#0a1628,#0f1f35);
 .pw-confirm:hover{background:#22c55e18}
 .pw-cancel{flex:1;padding:8px;border:1px solid var(--c4);border-radius:5px;background:transparent;color:var(--txt2);cursor:pointer;font-size:11px;font-weight:700;font-family:'Courier New',monospace}
 .pw-cancel:hover{background:#ffffff08}
-
-
-/* Allow rotation — landscape adjustments */
-@media (orientation: landscape) and (max-height: 500px) {
-  .dash { padding: 6px; gap: 6px; }
-  .panel { padding: 8px; }
-  .tank-outer { width: 50px; height: 70px; }
-  .sensor-val { font-size: 16px; }
-  .log-box { height: 80px; }
-  .scada-wrap { max-height: 80vh; overflow-y: auto; }
-}
 
 </style>
 
@@ -306,8 +268,6 @@ html{background:#0a1628}body{background:linear-gradient(135deg,#0a1628,#0f1f35);
     </div>
   </div>
 </div>
-<!-- TOOLTIP -->
-<div class="scada-tooltip" id="scadaTip"></div>
 
 
 <!-- MODE TOGGLE BAR -->
@@ -506,304 +466,6 @@ html{background:#0a1628}body{background:linear-gradient(135deg,#0a1628,#0f1f35);
   </div>
 </div>
 
-
-<!-- PROCESS VIEW PANEL (always visible, read-only in guest) -->
-
-  <div class="panel full-width" id="processViewPanel">
-  <div class="panel-title">Process View</div>
-
-  <div class="pv-tab-bar">
-    <button class="pv-tab active" onclick="showPvTab('schematic',this)">SCHEMATIC</button>
-    <button class="pv-tab" onclick="showPvTab('legend',this)">LEGEND</button>
-  </div>
-
-  <div class="pv-pane active" id="pvSchematic">
-    <div class="scada-wrap">
-    <svg class="scada-svg" viewBox="0 0 780 460" xmlns="http://www.w3.org/2000/svg" id="scadaSvg">
-      <defs>
-        <marker id="arr" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
-          <polygon points="0 0, 7 3.5, 0 7" fill="#0096ff"></polygon>
-        </marker>
-        <marker id="arr2" markerWidth="7" markerHeight="7" refX="2" refY="3.5" orient="auto">
-          <polygon points="7 0, 0 3.5, 7 7" fill="#0096ff"></polygon>
-        </marker>
-      </defs>
-
-      <!-- Background -->
-      <rect width="780" height="460" fill="#0f1923" rx="8" style="fill:#0f1923 !important"></rect>
-
-      <!-- Title -->
-      <text x="14" y="22" font-family="Courier New" font-size="11" font-weight="700" fill="#00c9a7" letter-spacing="2">WATER STATION — PROCESS SCHEMATIC</text>
-
-      <!-- ═══ UPPER TANK ═══ -->
-      <rect x="420" y="38" width="160" height="120" rx="4" fill="#1a2535" stroke="#0096ff" stroke-width="2" id="upTankRect"></rect>
-      <!-- water fill (clipped) -->
-      <clipPath id="clipUp"><rect x="420" y="39" width="158" height="118" rx="3"></rect></clipPath>
-      <rect x="420" y="39" width="158" height="118" rx="3" fill="#0096ff18" id="upTankBg"></rect>
-      <!-- UPPER TANK -->
-		<rect x="420" id="upTankFill"
-			  y="157"
-			  width="158"
-			  height="0"
-			  fill="url(#fillGradUp)"
-			  clip-path="url(#clipUp)">
-		</rect>
-      <defs>
-        <linearGradient id="fillGradUp" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#00c9a744"></stop>
-          <stop offset="100%" stop-color="#0096ff99"></stop>
-        </linearGradient>
-        <linearGradient id="fillGradDown" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#00c9a744"></stop>
-          <stop offset="100%" stop-color="#0096ff99"></stop>
-        </linearGradient>
-      </defs>
-      <text x="500" y="85" font-family="Courier New" font-size="11" font-weight="700" fill="#e2e8f0" text-anchor="middle">UPPER TANK</text>
-      <text x="500" y="102" font-family="Courier New" font-size="10" fill="#94a3b8" text-anchor="middle">(max 32 cm)</text>
-      <text x="500" y="148" font-family="Courier New" font-size="12" font-weight="700" fill="#00c9a7" text-anchor="middle" id="svgUpLevel">— cm</text>
-
-      <!-- ═══ SOURCE TANK ═══ -->
-      <rect x="180" y="220" width="260" height="80" rx="4" fill="#1a2535" stroke="#2e3d50" stroke-width="2" id="downTankRect"></rect>
-      <clipPath id="clipDown">
-		  <rect x="181" y="221" width="258" height="80" rx="3"></rect>
-		</clipPath>
-      <!-- LOWER TANK -->
-		<rect x="181" y="221" width="258" height="80"
-			  rx="3" fill="#0096ff18"
-			  id="downTankBg"></rect>
-
-		<rect x="181" id="downTankFill"
-			  y="301"
-			  width="258"
-			  height="0"
-			  fill="url(#fillGradDown)"
-			  clip-path="url(#clipDown)">
-		</rect>
-      <text x="310" y="255" font-family="Courier New" font-size="11" font-weight="700" fill="#e2e8f0" text-anchor="middle">SOURCE TANK</text>
-      <text x="310" y="275" font-family="Courier New" font-size="10" fill="#94a3b8" text-anchor="middle">(max 22 cm)</text>
-      <text x="310" y="293" font-family="Courier New" font-size="12" font-weight="700" fill="#00c9a7" text-anchor="middle" id="svgDownLevel">— cm</text>
-
-      <!-- ═══ PIPES ═══ -->
-      <!-- Main return pipe: UpTank bottom → Source Tank (right side down) -->
-      <line x1="420" y1="98" x2="300" y2="98" stroke="#2e3d50" stroke-width="5" stroke-linecap="round" id="pipeReturn1"></line>
-      <line x1="300" y1="98" x2="300" y2="210" stroke="#2e3d50" stroke-width="5" stroke-linecap="round" id="pipeReturn2"></line>
-      <line x1="550" y1="190" x2="300" y2="190" stroke="#2e3d50" stroke-width="3" stroke-linecap="round" id="pipeReturn3"></line>
-      <!-- CV8 pipe down into source -->
-      <line x1="300" y1="190" x2="300" y2="220" stroke="#2e3d50" stroke-width="2" stroke-linecap="round" id="pipeCv8Down" marker-end="url(#arr)"></line>
-
-      <!-- Pump A branch -->
-      <line x1="230" y1="300" x2="230" y2="420" stroke="#2e3d50" stroke-width="5" stroke-linecap="round" id="pipePaDown"></line>
-      <line x1="230" y1="420" x2="360" y2="420" stroke="#2e3d50" stroke-width="5" stroke-linecap="round" id="pipeToMain"></line>
-      <!-- Pump B branch -->
-      <line x1="310" y1="300" x2="310" y2="420" stroke="#2e3d50" stroke-width="5" stroke-linecap="round" id="pipePbDown"></line>
-      <!-- Pump C branch -->
-      <line x1="390" y1="300" x2="390" y2="420" stroke="#2e3d50" stroke-width="5" stroke-linecap="round" id="pipePcDown"></line>
-      <line x1="310" y1="420" x2="390" y2="420" stroke="#2e3d50" stroke-width="5" stroke-linecap="round" id="pipeMid"></line>
-      <!-- Main rise to UpTank -->
-      <line x1="390" y1="420" x2="550" y2="420" stroke="#2e3d50" stroke-width="5" stroke-linecap="round" id="pipeMidRight"></line>
-      <line x1="550" y1="420" x2="550" y2="160" stroke="#2e3d50" stroke-width="5" stroke-linecap="round" id="pipeRise"></line>
-      <line x1="550" y1="170" x2="550" y2="160" stroke="#2e3d50" stroke-width="2" stroke-linecap="round" marker-end="url(#arr)" id="pipeRiseEnd"></line>
-
-      <!-- ═══ VALVE XV7 ═══ -->
-      <g id="v7grp" class="scada-interactive" onclick="scadaValveClick(7)" transform="translate(370,97)">
-        <rect x="-18" y="-14" width="36" height="28" rx="3" fill="#1a2535" stroke="none" opacity="0.01"></rect>
-        <polygon points="-10,-8 10,-8 0,0" fill="#2e3d50" stroke="#94a3b8" stroke-width="1.2" id="v7t"></polygon>
-        <polygon points="-10,8 10,8 0,0" fill="#2e3d50" stroke="#94a3b8" stroke-width="1.2" id="v7b"></polygon>
-        <line x1="-18" y1="0" x2="-10" y2="0" stroke="#94a3b8" stroke-width="1.5" id="v7lp"></line>
-        <line x1="10" y1="0" x2="18" y2="0" stroke="#94a3b8" stroke-width="1.5" id="v7rp"></line>
-        <text x="0" y="-17" font-family="Courier New" font-size="9" fill="#94a3b8" text-anchor="middle">XV7</text>
-      </g>
-
-      <!-- ═══ VALVE CV8 ═══ -->
-      <g id="v8grp" class="scada-interactive" onclick="scadaValveClick(8)" transform="translate(370,190) rotate(90)">
-        <rect x="-14" y="-18" width="28" height="36" rx="3" fill="#1a2535" stroke="none" opacity="0.01"></rect>
-        <polygon points="-8,-10 8,-10 0,0" fill="#2e3d50" stroke="#94a3b8" stroke-width="1.2" id="v8t"></polygon>
-        <polygon points="-8,10 8,10 0,0" fill="#2e3d50" stroke="#94a3b8" stroke-width="1.2" id="v8b"></polygon>
-        <line x1="0" y1="-18" x2="0" y2="-10" stroke="#94a3b8" stroke-width="1.5" id="v8tp"></line>
-        <line x1="0" y1="10" x2="0" y2="18" stroke="#94a3b8" stroke-width="1.5" id="v8bp"></line>
-        <text x="-7" y="-17" font-family="Courier New" font-size="9" fill="#94a3b8" style="
-    transform: rotate(-90deg);
-">CV8</text>
-      </g>
-
-      <!-- ═══ PUMP A ═══ -->
-      <g id="pAgrp" class="scada-interactive" onclick="scadaPumpClick('A')" transform="translate(230,356)">
-        <circle cx="0" cy="0" r="14" fill="#243040" stroke="#94a3b8" stroke-width="1.5" id="pAcircle"></circle>
-        <text x="0" y="4" font-family="Courier New" font-size="9" font-weight="700" fill="#94a3b8" text-anchor="middle" id="pAlbl">A</text>
-        <text x="-35" y="3" font-family="Courier New" font-size="8" fill="#94a3b8" text-anchor="middle">PUMP A</text>
-      </g>
-      <!-- XV1 above pump A -->
-      <g id="v1grp" class="scada-interactive" onclick="scadaValveClick(1)" transform="translate(230,318)">
-        <polygon points="-8,-8 8,-8 0,0" fill="#2e3d50" stroke="#94a3b8" stroke-width="1.2" id="v1t"></polygon>
-        <polygon points="-8,8 8,8 0,0" fill="#2e3d50" stroke="#94a3b8" stroke-width="1.2" id="v1b"></polygon>
-        <line x1="0" y1="-16" x2="0" y2="-8" stroke="#94a3b8" stroke-width="1.5"></line>
-        <line x1="0" y1="8" x2="0" y2="16" stroke="#94a3b8" stroke-width="1.5"></line>
-        <text x="14" y="4" font-family="Courier New" font-size="8" fill="#94a3b8">XV1</text>
-      </g>
-      <!-- XV2 below pump A -->
-      <g id="v2grp" class="scada-interactive" onclick="scadaValveClick(2)" transform="translate(230,393)">
-        <polygon points="-8,-8 8,-8 0,0" fill="#2e3d50" stroke="#94a3b8" stroke-width="1.2" id="v2t"></polygon>
-        <polygon points="-8,8 8,8 0,0" fill="#2e3d50" stroke="#94a3b8" stroke-width="1.2" id="v2b"></polygon>
-        <line x1="0" y1="-16" x2="0" y2="-8" stroke="#94a3b8" stroke-width="1.5"></line>
-        <line x1="0" y1="8" x2="0" y2="16" stroke="#94a3b8" stroke-width="1.5"></line>
-        <text x="14" y="4" font-family="Courier New" font-size="8" fill="#94a3b8">XV2</text>
-      </g>
-
-      <!-- ═══ PUMP B ═══ -->
-      <g id="pBgrp" class="scada-interactive" onclick="scadaPumpClick('B')" transform="translate(310,356)">
-        <circle cx="0" cy="0" r="16" fill="#243040" stroke="#94a3b8" stroke-width="1.5" id="pBcircle"></circle>
-        <text x="0" y="4" font-family="Courier New" font-size="9" font-weight="700" fill="#94a3b8" text-anchor="middle" id="pBlbl">B</text>
-        <text x="-35" y="3" font-family="Courier New" font-size="8" fill="#94a3b8" text-anchor="middle">PUMP B</text>
-      </g>
-      <!-- XV3 above pump B -->
-      <g id="v3grp" class="scada-interactive" onclick="scadaValveClick(3)" transform="translate(310,318)">
-        <polygon points="-8,-8 8,-8 0,0" fill="#2e3d50" stroke="#94a3b8" stroke-width="1.2" id="v3t"></polygon>
-        <polygon points="-8,8 8,8 0,0" fill="#2e3d50" stroke="#94a3b8" stroke-width="1.2" id="v3b"></polygon>
-        <line x1="0" y1="-16" x2="0" y2="-8" stroke="#94a3b8" stroke-width="1.5"></line>
-        <line x1="0" y1="8" x2="0" y2="16" stroke="#94a3b8" stroke-width="1.5"></line>
-        <text x="14" y="4" font-family="Courier New" font-size="8" fill="#94a3b8">XV3</text>
-      </g>
-      <!-- XV4 below pump B -->
-      <g id="v4grp" class="scada-interactive" onclick="scadaValveClick(4)" transform="translate(310,393)">
-        <polygon points="-8,-8 8,-8 0,0" fill="#2e3d50" stroke="#94a3b8" stroke-width="1.2" id="v4t"></polygon>
-        <polygon points="-8,8 8,8 0,0" fill="#2e3d50" stroke="#94a3b8" stroke-width="1.2" id="v4b"></polygon>
-        <line x1="0" y1="-16" x2="0" y2="-8" stroke="#94a3b8" stroke-width="1.5"></line>
-        <line x1="0" y1="8" x2="0" y2="16" stroke="#94a3b8" stroke-width="1.5"></line>
-        <text x="14" y="4" font-family="Courier New" font-size="8" fill="#94a3b8">XV4</text>
-      </g>
-
-      <!-- ═══ PUMP C ═══ -->
-      <g id="pCgrp" class="scada-interactive" onclick="scadaPumpClick('C')" transform="translate(390,356)">
-        <circle cx="0" cy="0" r="16" fill="#243040" stroke="#94a3b8" stroke-width="1.5" id="pCcircle"></circle>
-        <text x="0" y="4" font-family="Courier New" font-size="9" font-weight="700" fill="#94a3b8" text-anchor="middle" id="pClbl">C</text>
-        <text x="-35" y="3" font-family="Courier New" font-size="8" fill="#94a3b8" text-anchor="middle">PUMP C</text>
-      </g>
-      <!-- XV5 above pump C -->
-      <g id="v5grp" class="scada-interactive" onclick="scadaValveClick(5)" transform="translate(390,318)">
-        <polygon points="-8,-8 8,-8 0,0" fill="#2e3d50" stroke="#94a3b8" stroke-width="1.2" id="v5t"></polygon>
-        <polygon points="-8,8 8,8 0,0" fill="#2e3d50" stroke="#94a3b8" stroke-width="1.2" id="v5b"></polygon>
-        <line x1="0" y1="-16" x2="0" y2="-8" stroke="#94a3b8" stroke-width="1.5"></line>
-        <line x1="0" y1="8" x2="0" y2="16" stroke="#94a3b8" stroke-width="1.5"></line>
-        <text x="14" y="4" font-family="Courier New" font-size="8" fill="#94a3b8">XV5</text>
-      </g>
-      <!-- XV6 below pump C -->
-      <g id="v6grp" class="scada-interactive" onclick="scadaValveClick(6)" transform="translate(390,393)">
-        <polygon points="-8,-8 8,-8 0,0" fill="#2e3d50" stroke="#94a3b8" stroke-width="1.2" id="v6t"></polygon>
-        <polygon points="-8,8 8,8 0,0" fill="#2e3d50" stroke="#94a3b8" stroke-width="1.2" id="v6b"></polygon>
-        <line x1="0" y1="-16" x2="0" y2="-8" stroke="#94a3b8" stroke-width="1.5"></line>
-        <line x1="0" y1="8" x2="0" y2="16" stroke="#94a3b8" stroke-width="1.5"></line>
-        <text x="14" y="4" font-family="Courier New" font-size="8" fill="#94a3b8">XV6</text>
-      </g>
-
-      <!-- ═══ SENSOR READOUTS ═══ -->
-      <!-- LT2 - UpTank -->
-      <rect x="616" y="38" width="148" height="48" rx="4" fill="#162032" stroke="#2e3d50" stroke-width="1"></rect>
-      <text x="624" y="52" font-family="Courier New" font-size="8" fill="#94a3b8" letter-spacing="1">LEVEL TRANSMITTER LT2</text>
-      <text x="624" y="74" font-family="Courier New" font-size="16" font-weight="700" fill="#00c9a7" id="svgLT2">— cm</text>
-
-      <!-- PT2 - UpTank pressure -->
-      <rect x="616" y="96" width="148" height="48" rx="4" fill="#162032" stroke="#2e3d50" stroke-width="1"></rect>
-      <text x="624" y="110" font-family="Courier New" font-size="8" fill="#94a3b8" letter-spacing="1">PRESSURE TX PT2</text>
-      <text x="624" y="132" font-family="Courier New" font-size="16" font-weight="700" fill="#00c9a7" id="svgPT2">— bar</text>
-
-      <!-- FT2 - Flow upper -->
-      <rect x="616" y="154" width="148" height="48" rx="4" fill="#162032" stroke="#2e3d50" stroke-width="1"></rect>
-      <text x="624" y="168" font-family="Courier New" font-size="8" fill="#94a3b8" letter-spacing="1">FLOW TRANSMITTER FT2</text>
-      <text x="624" y="190" font-family="Courier New" font-size="16" font-weight="700" fill="#00c9a7" id="svgFT2">— m³/h</text>
-
-      <!-- LT1 - DownTank -->
-      <rect x="14" y="220" width="148" height="48" rx="4" fill="#162032" stroke="#2e3d50" stroke-width="1"></rect>
-      <text x="22" y="234" font-family="Courier New" font-size="8" fill="#94a3b8" letter-spacing="1">LEVEL TRANSMITTER LT1</text>
-      <text x="22" y="256" font-family="Courier New" font-size="16" font-weight="700" fill="#00c9a7" id="svgLT1">— cm</text>
-
-      <!-- FT1 - Flow lower -->
-      <rect x="616" y="220" width="148" height="48" rx="4" fill="#162032" stroke="#2e3d50" stroke-width="1"></rect>
-      <text x="624" y="234" font-family="Courier New" font-size="8" fill="#94a3b8" letter-spacing="1">FLOW TRANSMITTER FT1</text>
-      <text x="624" y="256" font-family="Courier New" font-size="16" font-weight="700" fill="#00c9a7" id="svgFT1">— m³/h</text>
-
-      <!-- PT1 - Source pressure -->
-      <rect x="616" y="278" width="148" height="48" rx="4" fill="#162032" stroke="#2e3d50" stroke-width="1"></rect>
-      <text x="624" y="292" font-family="Courier New" font-size="8" fill="#94a3b8" letter-spacing="1">PRESSURE TX PT1</text>
-      <text x="624" y="314" font-family="Courier New" font-size="16" font-weight="700" fill="#00c9a7" id="svgPT1">— bar</text>
-
-      <!-- Connection lines sensor→component -->
-      <line x1="616" y1="62" x2="580" y2="62" stroke="#2e3d50" stroke-width="1" stroke-dasharray="4,3"></line>
-<line x1="165" y1="250" x2="180" y2="250" stroke="#2e3d50" stroke-width="1" stroke-dasharray="4,3"></line>
-
-      <line x1="600" y1="120" x2="600" y2="178" stroke="#2e3d50" stroke-width="1" stroke-dasharray="4,3"></line>
-      <line x1="616" y1="120" x2="604" y2="120" stroke="#2e3d50" stroke-width="1" stroke-dasharray="4,3"></line>
-      <line x1="616" y1="178" x2="550" y2="178" stroke="#2e3d50" stroke-width="1" stroke-dasharray="4,3"></line>
-<line x1="600" y1="240" x2="600" y2="300" stroke="#2e3d50" stroke-width="1" stroke-dasharray="4,3"></line>
-<line x1="616" y1="300" x2="604" y2="300" stroke="#2e3d50" stroke-width="1" stroke-dasharray="4,3"></line>
-
-
-<line x1="616" y1="240" x2="550" y2="240" stroke="#2e3d50" stroke-width="1" stroke-dasharray="4,3"></line>
-
-
-      <!-- Operator-only badge overlay on interactive elements in guest mode -->
-      <text x="390" y="452" font-family="Courier New" font-size="9" fill="#94a3b8" text-anchor="middle" id="scadaGuestNote">GUEST MODE — Click elements to view status</text>
-
-    </svg>
-    </div>
-  </div>
-
-  <div class="pv-pane" id="pvLegend">
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;padding:4px 0">
-      <div style="background:var(--c3);border-radius:6px;padding:10px">
-        <div style="font-size:9px;color:var(--txt2);letter-spacing:2px;margin-bottom:8px">VALVE STATES</div>
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-          <svg width="24" height="16" viewBox="0 0 24 16"><polygon points="2,0 12,8 2,16" fill="#22c55e"></polygon><polygon points="22,0 12,8 22,16" fill="#22c55e"></polygon></svg>
-          <span style="font-size:11px;color:var(--ok)">OPEN</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-          <svg width="24" height="16" viewBox="0 0 24 16"><polygon points="2,0 12,8 2,16" fill="#ef4444"></polygon><polygon points="22,0 12,8 22,16" fill="#ef4444"></polygon></svg>
-          <span style="font-size:11px;color:var(--danger)">CLOSED</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <svg width="24" height="16" viewBox="0 0 24 16"><polygon points="2,0 12,8 2,16" fill="#f59e0b"></polygon><polygon points="22,0 12,8 22,16" fill="#f59e0b"></polygon></svg>
-          <span style="font-size:11px;color:var(--warn)">UNKNOWN</span>
-        </div>
-      </div>
-      <div style="background:var(--c3);border-radius:6px;padding:10px">
-        <div style="font-size:9px;color:var(--txt2);letter-spacing:2px;margin-bottom:8px">PUMP STATES</div>
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-          <svg width="18" height="18" viewBox="0 0 18 18"><circle cx="9" cy="9" r="8" fill="#22c55e44" stroke="#22c55e" stroke-width="1.5"></circle></svg>
-          <span style="font-size:11px;color:var(--ok)">RUNNING</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-          <svg width="18" height="18" viewBox="0 0 18 18"><circle cx="9" cy="9" r="8" fill="#ef444422" stroke="#ef4444" stroke-width="1.5"></circle></svg>
-          <span style="font-size:11px;color:var(--danger)">STOPPED</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <svg width="18" height="18" viewBox="0 0 18 18"><circle cx="9" cy="9" r="8" fill="#f59e0b22" stroke="#f59e0b" stroke-width="1.5"></circle></svg>
-          <span style="font-size:11px;color:var(--warn)">UNKNOWN</span>
-        </div>
-      </div>
-      <div style="background:var(--c3);border-radius:6px;padding:10px">
-        <div style="font-size:9px;color:var(--txt2);letter-spacing:2px;margin-bottom:8px">PIPES</div>
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-          <svg width="32" height="8"><line x1="0" y1="4" x2="32" y2="4" stroke="#0096ff" stroke-width="4"></line></svg>
-          <span style="font-size:11px;color:var(--acc2)">FLOW ACTIVE</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <svg width="32" height="8"><line x1="0" y1="4" x2="32" y2="4" stroke="#2e3d50" stroke-width="4"></line></svg>
-          <span style="font-size:11px;color:var(--txt2)">NO FLOW</span>
-        </div>
-      </div>
-      <div style="background:var(--c3);border-radius:6px;padding:10px">
-        <div style="font-size:9px;color:var(--txt2);letter-spacing:2px;margin-bottom:8px">INTERACTION</div>
-        <div style="font-size:11px;color:var(--txt2);line-height:1.7">
-          Click any valve or pump to view its status.<br>
-          In <span style="color:var(--ok)">OPERATOR</span> mode, clicking sends a control command.
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-  
-
 <!-- ACTIVITY LOG -->
 <div class="panel full-width">
   <div class="panel-title">Activity Log</div>
@@ -815,132 +477,41 @@ html{background:#0a1628}body{background:linear-gradient(135deg,#0a1628,#0f1f35);
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/4.3.7/mqtt.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
-
-// ==========================
-// UPDATE TANK VISUALIZATION
-// ==========================
-function updateTankLevels(upLevel, downLevel)
-{
-    // =========================================
-    // LIMIT VALUES
-    // =========================================
-    upLevel = Math.max(0, Math.min(32, upLevel));
-    downLevel = Math.max(0, Math.min(22, downLevel));
-
-    // =========================================
-    // PERCENTAGES
-    // =========================================
-    const upPercent = (upLevel / 32) * 100;
-    const downPercent = (downLevel / 22) * 100;
-
-    // =========================================
-    // HTML TANKS
-    // =========================================
-    document.getElementById('fillUp').style.height =
-        upPercent + '%';
-
-    document.getElementById('fillDown').style.height =
-        downPercent + '%';
-
-    document.getElementById('pctUp').innerText =
-        upPercent.toFixed(0) + '%';
-
-    document.getElementById('pctDown').innerText =
-        downPercent.toFixed(0) + '%';
-
-    // =========================================
-    // SVG UPPER TANK
-    // =========================================
-    const upTankMaxHeight = 118;
-    const upTankBottomY = 157;
-
-    const upFillHeight =
-        (upPercent / 100) * upTankMaxHeight;
-
-    const upFillY =
-        upTankBottomY - upFillHeight;
-
-    const upTankFill =
-        document.getElementById('upTankFill');
-
-    upTankFill.setAttribute('height', upFillHeight);
-    upTankFill.setAttribute('y', upFillY);
-
-    // =========================================
-    // SVG LOWER TANK
-    // =========================================
-    const downTankMaxHeight = 80;
-    const downTankTopY = 221;
-
-    const downFillHeight =
-        (downPercent / 100) * downTankMaxHeight;
-
-    const downFillY =
-        downTankTopY + (downTankMaxHeight - downFillHeight);
-
-    const downTankFill =
-        document.getElementById('downTankFill');
-
-    downTankFill.setAttribute('height', downFillHeight);
-    downTankFill.setAttribute('y', downFillY);
-
-    // =========================================
-    // TEXT LABELS
-    // =========================================
-    document.getElementById('svgUpLevel').textContent =
-        upLevel.toFixed(1) + ' cm';
-
-    document.getElementById('svgDownLevel').textContent =
-        downLevel.toFixed(1) + ' cm';
-
-    document.getElementById('svgLT1').textContent =
-        downLevel.toFixed(1) + ' cm';
-
-    document.getElementById('svgLT2').textContent =
-        upLevel.toFixed(1) + ' cm';
-
-    document.getElementById('sTop').textContent =
-        upLevel.toFixed(1);
-
-    document.getElementById('sBot').textContent =
-        downLevel.toFixed(1);
-}
-
-
-// =========================================
-// TEST EXAMPLE
-// =========================================
-updateTankLevels(18, 10);
-
-</script>
-<script>
 // ── MODE MANAGEMENT ──
 let currentMode = 'guest'; // 'operator' or 'guest' - default is guest (read-only)
 
 function requestOperator() {
+  // Already operator, no need to prompt
   if (currentMode === 'operator') return;
   const overlay = document.getElementById('pwOverlay');
-  document.getElementById('pwInput').value = '';
-  document.getElementById('pwError').textContent = '';
+  const input = document.getElementById('pwInput');
+  const err = document.getElementById('pwError');
+  input.value = '';
+  err.textContent = '';
   overlay.classList.add('show');
-  setTimeout(() => document.getElementById('pwInput').focus(), 50);
+  setTimeout(() => input.focus(), 50);
 }
+
 function confirmPassword() {
   const input = document.getElementById('pwInput');
+  const err = document.getElementById('pwError');
   if (input.value === 'Siemens') {
     document.getElementById('pwOverlay').classList.remove('show');
     setMode('operator');
   } else {
-    document.getElementById('pwError').textContent = 'INCORRECT PASSWORD';
-    input.style.borderColor = 'var(--danger)';
+    err.textContent = 'INCORRECT PASSWORD';
     input.value = '';
     input.focus();
+    // shake animation
+    input.style.borderColor = 'var(--danger)';
     setTimeout(() => { input.style.borderColor = ''; }, 1000);
   }
 }
+
 function cancelPassword() {
   document.getElementById('pwOverlay').classList.remove('show');
   document.getElementById('pwError').textContent = '';
+  // ensure guest stays active
   document.getElementById('modeGuest').classList.add('active');
   document.getElementById('modeOperator').classList.remove('active');
 }
@@ -1088,8 +659,6 @@ function parseTelemetry(d){
       }
     }
   }
-  // Update SCADA process view
-  updateScada(d.sensors||{}, d.pumps||{}, d.valves||{});
 }
 
 function setPump(id,status){
@@ -1415,120 +984,6 @@ function waitForCondition(sensor,op,target,timeout){
       if(Date.now()-start>=timeout){clearInterval(iv);resolve(false);}
     },300);
   });
-}
-
-
-// ── PROCESS VIEW TABS ──
-function showPvTab(id, el) {
-  document.querySelectorAll('.pv-pane').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.pv-tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('pv' + id.charAt(0).toUpperCase() + id.slice(1)).classList.add('active');
-  el.classList.add('active');
-}
-
-// ── SCADA UPDATE ──
-const UP_MAX = 32, DOWN_MAX = 22;
-
-function updateScada(sensors, pumps, valves) {
-  // Tank fills
-  const upCm = parseFloat(sensors.levelTop) || 0;
-  const downCm = parseFloat(sensors.levelBottom) || 0;
-  const upPct = Math.min(1, upCm / UP_MAX);
-  const downPct = Math.min(1, downCm / DOWN_MAX);
-
-  const upFill = document.getElementById('upTankFill');
-  const downFill = document.getElementById('downTankFill');
-  if (upFill) { const h = Math.round(116 * upPct); upFill.setAttribute('y', 157 - h); upFill.setAttribute('height', h); }
-  if (downFill) { const h = Math.round(106 * downPct); downFill.setAttribute('y', 329 - h); downFill.setAttribute('height', h); }
-
-  // Sensor text
-  const s = (id, v, unit) => { const e = document.getElementById(id); if (e && v !== undefined) e.textContent = parseFloat(v).toFixed(2) + ' ' + unit; };
-  s('svgUpLevel', sensors.levelTop, 'cm');
-  s('svgDownLevel', sensors.levelBottom, 'cm');
-  s('svgLT2', sensors.levelTop, 'cm');
-  s('svgLT1', sensors.levelBottom, 'cm');
-  s('svgPT2', sensors.pressure2, 'bar');
-  s('svgPT1', sensors.pressure1, 'bar');
-  s('svgFT2', sensors.flow2, 'm³/h');
-  s('svgFT1', sensors.flow1, 'm³/h');
-
-  // Pumps
-  ['A','B','C'].forEach(p => {
-    const status = pumps['pump'+p];
-    const circle = document.getElementById('p'+p+'circle');
-    const lbl = document.getElementById('p'+p+'lbl');
-    if (!circle) return;
-    const isOn = status === 'OPEN';
-    const isOff = status === 'CLOSED';
-    circle.setAttribute('stroke', isOn ? '#22c55e' : isOff ? '#ef4444' : '#f59e0b');
-    circle.setAttribute('fill', isOn ? '#22c55e22' : isOff ? '#ef444422' : '#f59e0b22');
-    if (lbl) lbl.setAttribute('fill', isOn ? '#22c55e' : isOff ? '#ef4444' : '#f59e0b');
-  });
-
-  // Valves 1-8 (map: 1=XV1,2=XV2,3=XV3,4=XV4,5=XV5,6=XV6,7=XV7,8=CV8)
-  const vMap = {1:'v1',2:'v2',3:'v3',4:'v4',5:'v5',6:'v6',7:'v7',8:'v8'};
-  for (let i = 1; i <= 8; i++) {
-    const status = valves['valve'+i];
-    const pfx = vMap[i];
-    const top = document.getElementById(pfx+'t');
-    const bot = document.getElementById(pfx+'b');
-    if (!top) continue;
-    const col = status === 'OPEN' ? '#22c55e' : status === 'CLOSED' ? '#ef4444' : '#f59e0b';
-    top.setAttribute('fill', col + '55'); top.setAttribute('stroke', col);
-    bot.setAttribute('fill', col + '55'); bot.setAttribute('stroke', col);
-    // pipe highlighting — active if valve open
-    highlightPumpsAndPipes(pumps, valves);
-  }
-}
-
-function highlightPumpsAndPipes(pumps, valves) {
-  const anyPump = pumps.pumpA === 'OPEN' || pumps.pumpB === 'OPEN' || pumps.pumpC === 'OPEN';
-  const pipeCol = anyPump ? '#0096ff' : '#2e3d50';
-  ['pipeRise','pipeRiseEnd','pipeMid','pipeMidRight','pipeToMain'].forEach(id => {
-    const e = document.getElementById(id); if (e) e.setAttribute('stroke', pipeCol);
-  });
-  ['A','B','C'].forEach((p,idx) => {
-    const on = pumps['pump'+p] === 'OPEN';
-    const col = on ? '#0096ff' : '#2e3d50';
-    const downId = ['pipePaDown','pipePbDown','pipePcDown'][idx];
-    const e = document.getElementById(downId); if (e) e.setAttribute('stroke', col);
-  });
-  const retOn = valves.valve7 === 'OPEN';
-  ['pipeReturn1','pipeReturn2','pipeReturn3','pipeCv8Down'].forEach(id => {
-    const e = document.getElementById(id); if (e) e.setAttribute('stroke', retOn ? '#0096ff' : '#2e3d50');
-  });
-}
-
-// ── SCADA CLICK HANDLERS ──
-function scadaValveClick(num) {
-  const status = lastTelemetry.valves ? lastTelemetry.valves['valve'+num] : 'UNKNOWN';
-  const label = num === 8 ? 'CV8' : 'XV'+num;
-  if (currentMode === 'operator') {
-    // toggle
-    const newState = (status === 'OPEN') ? '0' : '1';
-    sendCmd('water/control/valve'+num, newState);
-  } else {
-    showScadaTip(label + ': ' + (status || 'UNKNOWN'));
-  }
-}
-
-function scadaPumpClick(p) {
-  const status = lastTelemetry.pumps ? lastTelemetry.pumps['pump'+p] : 'UNKNOWN';
-  if (currentMode === 'operator') {
-    const newState = (status === 'OPEN') ? '0' : '1';
-    sendCmd('water/control/pump'+p, newState);
-  } else {
-    showScadaTip('PUMP ' + p + ': ' + (status || 'UNKNOWN'));
-  }
-}
-
-function showScadaTip(msg) {
-  const tip = document.getElementById('scadaTip');
-  tip.textContent = msg;
-  tip.style.display = 'block';
-  tip.style.left = '50%'; tip.style.top = '20px';
-  tip.style.transform = 'translateX(-50%)';
-  setTimeout(() => { tip.style.display = 'none'; }, 2000);
 }
 
 buildValves();
