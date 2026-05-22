@@ -35,12 +35,6 @@ html{background:#0a1628}body{background:linear-gradient(135deg,#0a1628,#0f1f35);
 .tank-name{font-size:10px;color:var(--txt2);text-transform:uppercase;letter-spacing:1px}
 .pump-row{display:flex;flex-direction:column;gap:8px}
 .pump-item{display:flex;align-items:center;gap:10px;background:var(--c3);border-radius:6px;padding:8px 10px}
-.pump-item.tripped{background:#ef444410;border:1px solid #ef444466;animation:faultPulse 1.5s infinite}
-.pump-item-ro{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--c3);border-radius:6px;padding:8px 10px}
-.pump-item-ro.tripped{background:#ef444410;border:1px solid #ef444466;animation:faultPulse 1.5s infinite}
-.badge-trip{display:none;font-size:9px;font-weight:700;letter-spacing:1px;color:#ef4444;background:#ef444422;border:1px solid #ef444455;border-radius:4px;padding:2px 6px;font-family:'Courier New',monospace;white-space:nowrap}
-.badge-backup{display:none;font-size:9px;font-weight:700;letter-spacing:1px;color:#f59e0b;background:#f59e0b18;border:1px solid #f59e0b55;border-radius:4px;padding:2px 6px;font-family:'Courier New',monospace;white-space:nowrap}
-.show-badge{display:inline-block!important}
 .pump-name{font-size:11px;font-weight:700;letter-spacing:1px;width:65px;color:var(--txt2)}
 .pump-status{padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:1px;min-width:65px;text-align:center;transition:all 0.3s}
 .status-open{background:#22c55e22;color:#22c55e;border:1px solid #22c55e55}
@@ -48,6 +42,7 @@ html{background:#0a1628}body{background:linear-gradient(135deg,#0a1628,#0f1f35);
 .status-unknown{background:#f59e0b22;color:#f59e0b;border:1px solid #f59e0b55}
 /* Guest mode pump display */
 .pump-status-ro{padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:1px;min-width:65px;text-align:center}
+.pump-item-ro{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--c3);border-radius:6px;padding:8px 10px}
 .btn-grp{display:flex;gap:6px;margin-left:auto}
 .btn{padding:4px 10px;border:1px solid;border-radius:4px;cursor:pointer;font-size:11px;font-weight:700;letter-spacing:1px;transition:all 0.2s;background:transparent;font-family:'Courier New',monospace}
 .btn-on{border-color:var(--ok);color:var(--ok)}.btn-on:hover{background:#22c55e22}
@@ -86,40 +81,6 @@ html{background:#0a1628}body{background:linear-gradient(135deg,#0a1628,#0f1f35);
 .seq-stop{border-color:var(--warn);color:var(--warn);background:transparent}.seq-stop:hover{background:#f59e0b22}
 .seq-reset{border-color:var(--txt2);color:var(--txt2);background:transparent}.seq-reset:hover{background:#ffffff11}
 .sub-label{font-size:10px;color:var(--txt2);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;margin-top:10px}
-
-/* Fault panel */
-.fault-banner{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:6px;border:1px solid var(--c4);background:var(--c3);transition:all .3s}
-.fault-banner.normal{border-color:#22c55e44;background:#22c55e08}
-.fault-banner.active{border-color:#ef444466;background:#ef444410;animation:faultPulse 1.5s infinite}
-@keyframes faultPulse{0%,100%{box-shadow:0 0 0 0 #ef444400}50%{box-shadow:0 0 0 4px #ef444422}}
-.fault-code-badge{font-size:22px;font-weight:700;font-family:'Courier New',monospace;min-width:32px;text-align:center}
-.fault-code-badge.normal{color:var(--ok)}
-.fault-code-badge.active{color:var(--danger)}
-.fault-info{flex:1}
-.fault-name{font-size:13px;font-weight:700;letter-spacing:1px;font-family:'Courier New',monospace}
-.fault-name.normal{color:var(--ok)}
-.fault-name.active{color:var(--danger)}
-.fault-action{font-size:10px;color:var(--txt2);margin-top:3px;letter-spacing:1px}
-.fault-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.fault-dot.normal{background:var(--ok);box-shadow:0 0 6px var(--ok)}
-.fault-dot.active{background:var(--danger);box-shadow:0 0 6px var(--danger)}
-/* FTC toggle */
-.ftc-toggle-wrap{display:flex;align-items:center;gap:10px;padding:8px 14px;border-radius:6px;border:1px solid var(--c4);background:var(--c3)}
-.ftc-toggle-label{font-size:11px;font-weight:700;letter-spacing:1px;font-family:'Courier New',monospace;color:var(--txt2)}
-.ftc-status-text{font-size:11px;font-family:'Courier New',monospace;font-weight:700}
-.ftc-status-text.on{color:var(--acc2)}
-.ftc-status-text.off{color:var(--txt2)}
-.toggle-switch{position:relative;width:44px;height:24px;cursor:pointer;flex-shrink:0}
-.toggle-switch input{opacity:0;width:0;height:0}
-.toggle-slider{position:absolute;inset:0;border-radius:24px;background:var(--c4);transition:.3s;border:1px solid var(--c4)}
-.toggle-slider:before{content:'';position:absolute;width:18px;height:18px;left:2px;top:2px;border-radius:50%;background:var(--txt2);transition:.3s}
-.toggle-switch input:checked+.toggle-slider{background:#06b6d422;border-color:var(--acc2)}
-.toggle-switch input:checked+.toggle-slider:before{transform:translateX(20px);background:var(--acc2);box-shadow:0 0 6px var(--acc2)}
-/* sensor card fault state */
-.sensor-card.fault{border-color:#ef444466;background:#ef444410}
-.sensor-card.fault .sensor-val{color:var(--danger)}
-.sensor-card.fault .sensor-label{color:var(--danger)}
-.sensor-sim{font-size:10px;color:var(--acc2);margin-top:3px;letter-spacing:1px}
 
 /* Mode Toggle Styles */
 .mode-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;background:var(--c1);border-radius:8px;border:1px solid var(--c4);margin-bottom:10px}
@@ -383,29 +344,6 @@ html{background:#0a1628}body{background:linear-gradient(135deg,#0a1628,#0f1f35);
   </div>
 </div>
 
-<!-- FAULT STATUS PANEL -->
-<div class="panel full-width">
-  <div class="panel-title">Fault Status</div>
-  <div class="fault-banner normal" id="faultBanner">
-    <div class="fault-dot normal" id="faultDot"></div>
-    <div class="fault-code-badge normal" id="faultCodeBadge">0</div>
-    <div class="fault-info">
-      <div class="fault-name normal" id="faultName">NORMAL — No Fault Detected</div>
-      <div class="fault-action" id="faultAction">FTC: System operating normally. All commands pass through.</div>
-    </div>
-  </div>
-  <div style="height:10px"></div>
-  <div class="ftc-toggle-wrap">
-    <div class="ftc-toggle-label">FTC MODE</div>
-    <label class="toggle-switch">
-      <input type="checkbox" id="ftcToggle" onchange="onFtcToggle(this.checked)">
-      <span class="toggle-slider"></span>
-    </label>
-    <div class="ftc-status-text off" id="ftcStatusText">OFF — Direct control (bypasses Matlab)</div>
-    <button id="resetFtcBtn" onclick="resetFTC()" style="margin-left:auto;padding:5px 14px;border-radius:5px;border:1px solid #f59e0b;color:#f59e0b;background:transparent;cursor:pointer;font-size:11px;font-weight:700;font-family:'Courier New',monospace;letter-spacing:1px;transition:all .2s" onmouseover="this.style.background='#f59e0b22'" onmouseout="this.style.background='transparent'">⟳ RESET FTC</button>
-  </div>
-</div>
-
 <!-- TANK LEVELS -->
 <div class="panel">
   <div class="panel-title">Tank Levels</div>
@@ -424,11 +362,11 @@ html{background:#0a1628}body{background:linear-gradient(135deg,#0a1628,#0f1f35);
   <div class="sub-label">Flow &amp; Pressure</div>
   <div class="sensor-grid">
     <div class="sensor-card"><div class="sensor-label">Flow 1</div><div class="sensor-val" id="sFlow1">—</div><div class="sensor-unit">m³/h</div></div>
-    <div class="sensor-card" id="cardFlow2"><div class="sensor-label">Flow 2</div><div class="sensor-val" id="sFlow2">—</div><div class="sensor-unit">m³/h</div><div class="sensor-sim" id="simFlow2" style="display:none"></div></div>
+    <div class="sensor-card"><div class="sensor-label">Flow 2</div><div class="sensor-val" id="sFlow2">—</div><div class="sensor-unit">m³/h</div></div>
     <div class="sensor-card"><div class="sensor-label">Pressure 1</div><div class="sensor-val" id="sP1">—</div><div class="sensor-unit">bar</div></div>
-    <div class="sensor-card" id="cardP2"><div class="sensor-label">Pressure 2</div><div class="sensor-val" id="sP2">—</div><div class="sensor-unit">bar</div><div class="sensor-sim" id="simP2" style="display:none"></div></div>
-    <div class="sensor-card" id="cardTop"><div class="sensor-label">Level Top</div><div class="sensor-val" id="sTop">—</div><div class="sensor-unit">cm</div><div class="sensor-sim" id="simTop" style="display:none"></div></div>
-    <div class="sensor-card" id="cardBot"><div class="sensor-label">Level Bot</div><div class="sensor-val" id="sBot">—</div><div class="sensor-unit">cm</div><div class="sensor-sim" id="simBot" style="display:none"></div></div>
+    <div class="sensor-card"><div class="sensor-label">Pressure 2</div><div class="sensor-val" id="sP2">—</div><div class="sensor-unit">bar</div></div>
+    <div class="sensor-card"><div class="sensor-label">Level Top</div><div class="sensor-val" id="sTop">—</div><div class="sensor-unit">cm</div></div>
+    <div class="sensor-card"><div class="sensor-label">Level Bot</div><div class="sensor-val" id="sBot">—</div><div class="sensor-unit">cm</div></div>
   </div>
 </div>
 
@@ -436,34 +374,28 @@ html{background:#0a1628}body{background:linear-gradient(135deg,#0a1628,#0f1f35);
 <div class="panel" id="pumpsOperator" style="display:none">
   <div class="panel-title">Pumps</div>
   <div class="pump-row">
-    <div class="pump-item" id="cardPumpA">
+    <div class="pump-item">
       <div class="pump-name">PUMP A <span class="badge badge-vfd">Cont</span></div>
-      <span class="badge-trip" id="tripBadgeA">⚠ TRIPPED</span>
-      <span class="badge-backup" id="backupBadgeA">↩ BACKUP</span>
       <div class="pump-status status-unknown" id="stPumpA">UNKNOWN</div>
       <div class="btn-grp">
-        <button class="btn btn-on" onclick="sendCmd('water/control/ftc/pumpA','1')">ON</button>
-        <button class="btn btn-off" onclick="sendCmd('water/control/ftc/pumpA','0')">OFF</button>
+        <button class="btn btn-on" onclick="sendCmd('water/control/pumpA','1')">ON</button>
+        <button class="btn btn-off" onclick="sendCmd('water/control/pumpA','0')">OFF</button>
       </div>
     </div>
-    <div class="pump-item" id="cardPumpB">
+    <div class="pump-item">
       <div class="pump-name">PUMP B <span class="badge badge-dol">SOFT</span></div>
-      <span class="badge-trip" id="tripBadgeB">⚠ TRIPPED</span>
-      <span class="badge-backup" id="backupBadgeB">↩ BACKUP</span>
       <div class="pump-status status-unknown" id="stPumpB">UNKNOWN</div>
       <div class="btn-grp">
-        <button class="btn btn-on" onclick="sendCmd('water/control/ftc/pumpB','1')">ON</button>
-        <button class="btn btn-off" onclick="sendCmd('water/control/ftc/pumpB','0')">OFF</button>
+        <button class="btn btn-on" onclick="sendCmd('water/control/pumpB','1')">ON</button>
+        <button class="btn btn-off" onclick="sendCmd('water/control/pumpB','0')">OFF</button>
       </div>
     </div>
-    <div class="pump-item" id="cardPumpC">
+    <div class="pump-item">
       <div class="pump-name">PUMP C <span class="badge badge-soft">VFD</span></div>
-      <span class="badge-trip" id="tripBadgeC">⚠ TRIPPED</span>
-      <span class="badge-backup" id="backupBadgeC">↩ BACKUP</span>
       <div class="pump-status status-unknown" id="stPumpC">UNKNOWN</div>
       <div class="btn-grp">
-        <button class="btn btn-on" onclick="sendCmd('water/control/ftc/pumpC','1')">ON</button>
-        <button class="btn btn-off" onclick="sendCmd('water/control/ftc/pumpC','0')">OFF</button>
+        <button class="btn btn-on" onclick="sendCmd('water/control/pumpC','1')">ON</button>
+        <button class="btn btn-off" onclick="sendCmd('water/control/pumpC','0')">OFF</button>
       </div>
     </div>
   </div>
@@ -479,30 +411,24 @@ html{background:#0a1628}body{background:linear-gradient(135deg,#0a1628,#0f1f35);
 <div class="panel" id="pumpsGuest">
   <div class="panel-title">Pumps Status</div>
   <div class="pump-row">
-    <div class="pump-item-ro" id="cardPumpAGuest">
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+    <div class="pump-item-ro">
+      <div style="display:flex;align-items:center;gap:8px">
         <div class="pump-name" style="margin:0">PUMP A</div>
         <span class="badge badge-vfd">Cont</span>
-        <span class="badge-trip" id="tripBadgeAGuest">⚠ TRIPPED</span>
-        <span class="badge-backup" id="backupBadgeAGuest">↩ BACKUP</span>
       </div>
       <div class="pump-status-ro status-unknown" id="stPumpAGuest">UNKNOWN</div>
     </div>
-    <div class="pump-item-ro" id="cardPumpBGuest">
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+    <div class="pump-item-ro">
+      <div style="display:flex;align-items:center;gap:8px">
         <div class="pump-name" style="margin:0">PUMP B</div>
         <span class="badge badge-dol">SOFT</span>
-        <span class="badge-trip" id="tripBadgeBGuest">⚠ TRIPPED</span>
-        <span class="badge-backup" id="backupBadgeBGuest">↩ BACKUP</span>
       </div>
       <div class="pump-status-ro status-unknown" id="stPumpBGuest">UNKNOWN</div>
     </div>
-    <div class="pump-item-ro" id="cardPumpCGuest">
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+    <div class="pump-item-ro">
+      <div style="display:flex;align-items:center;gap:8px">
         <div class="pump-name" style="margin:0">PUMP C</div>
         <span class="badge badge-soft">VFD</span>
-        <span class="badge-trip" id="tripBadgeCGuest">⚠ TRIPPED</span>
-        <span class="badge-backup" id="backupBadgeCGuest">↩ BACKUP</span>
       </div>
       <div class="pump-status-ro status-unknown" id="stPumpCGuest">UNKNOWN</div>
     </div>
@@ -1108,22 +1034,10 @@ function toggleMqtt(){
       log('MQTT connected','ok');
       client.subscribe('water/system/telemetry');
       client.subscribe('water/control/#');
-      client.subscribe('water/system/faultcode');
-      client.subscribe('water/sim/telemetry');
     });
     client.on('message',(topic,payload)=>{
-      const msg=payload.toString().trim();
+      const msg=payload.toString();
       if(topic==='water/system/telemetry'){try{parseTelemetry(JSON.parse(msg));}catch(e){}}
-      else if(topic==='water/system/faultcode'){try{updateFaultStatus(parseInt(msg));}catch(e){}}
-      else if(topic==='water/sim/telemetry'){try{parseSimTelemetry(JSON.parse(msg));}catch(e){}}
-      // Matlab FTC inputs (what was commanded INTO Matlab)
-      else if(topic==='water/control/ftc/pumpA'){ftcIn.A=msg; checkTripBadges();}
-      else if(topic==='water/control/ftc/pumpB'){ftcIn.B=msg; checkTripBadges();}
-      else if(topic==='water/control/ftc/pumpC'){ftcIn.C=msg; checkTripBadges();}
-      // Matlab FTC outputs (what Matlab actually commanded the pump to do)
-      else if(topic==='water/control/pumpA'){ftcOut.A=msg; checkTripBadges();}
-      else if(topic==='water/control/pumpB'){ftcOut.B=msg; checkTripBadges();}
-      else if(topic==='water/control/pumpC'){ftcOut.C=msg; checkTripBadges();}
       else{log('&#8592; '+topic+': '+msg,'info');}
     });
     client.on('error',e=>{log('Error: '+e.message,'err');setMqttStatus(false,'broker.hivemq.com');});
@@ -1135,101 +1049,13 @@ function toggleMqtt(){
 const UP_TANK_MAX_CM = 32;
 const DOWN_TANK_MAX_CM = 22;
 
-// ── FAULT STATUS ──
-const FAULT_NAMES = {
-  0: {name:'NORMAL', action:'FTC: System operating normally. All commands pass through.'},
-  1: {name:'FLOW BLOCKAGE', action:'FTC: Blocked pump shut down automatically.'},
-  2: {name:'PUMP TRIP', action:'FTC: Tripped pump stopped, backup pump started.'},
-  3: {name:'FLOW2 SENSOR FAULT', action:'FTC: Flow2 reading substituted with Simulink model value.'},
-  4: {name:'PRESSURE2 SENSOR FAULT', action:'FTC: Pressure2 reading substituted with Simulink model value.'},
-  5: {name:'UPTANK SENSOR FAULT', action:'FTC: UpTank level substituted with Simulink model value.'},
-  6: {name:'DOWNTANK SENSOR FAULT', action:'FTC: DownTank level substituted with Simulink model value.'}
-};
-// which fault codes are sensor faults (show ERROR + sim substitute)
-const SENSOR_FAULT_CARDS = {
-  3: ['cardFlow2'],
-  4: ['cardP2'],
-  5: ['cardTop'],
-  6: ['cardBot']
-};
-let currentFaultCode = 0;
-
-function updateFaultStatus(code) {
-  currentFaultCode = code;
-  const isNormal = (code === 0);
-  const info = FAULT_NAMES[code] || {name:'UNKNOWN FAULT ('+code+')', action:'FTC: Unknown fault code received.'};
-
-  const banner = document.getElementById('faultBanner');
-  const dot    = document.getElementById('faultDot');
-  const badge  = document.getElementById('faultCodeBadge');
-  const name   = document.getElementById('faultName');
-  const action = document.getElementById('faultAction');
-
-  banner.className = 'fault-banner ' + (isNormal ? 'normal' : 'active');
-  dot.className    = 'fault-dot '    + (isNormal ? 'normal' : 'active');
-  badge.className  = 'fault-code-badge ' + (isNormal ? 'normal' : 'active');
-  name.className   = 'fault-name '   + (isNormal ? 'normal' : 'active');
-
-  badge.textContent  = code;
-  name.textContent   = (isNormal ? 'NORMAL — No Fault Detected' : 'FAULT ' + code + ': ' + info.name);
-  action.textContent = info.action;
-
-  // Reset all sensor cards to normal
-  ['cardFlow2','cardP2','cardTop','cardBot'].forEach(id => {
-    const card = document.getElementById(id);
-    if(card) card.classList.remove('fault');
-  });
-  // Hide all sim labels
-  ['simFlow2','simP2','simTop','simBot'].forEach(id => {
-    const el = document.getElementById(id);
-    if(el) el.style.display = 'none';
-  });
-
-  // Mark faulty sensor cards
-  const faultyCards = SENSOR_FAULT_CARDS[code] || [];
-  faultyCards.forEach(id => {
-    const card = document.getElementById(id);
-    if(card) card.classList.add('fault');
-    // Show ERROR on the value
-    const valMap = {cardFlow2:'sFlow2', cardP2:'sP2', cardTop:'sTop', cardBot:'sBot'};
-    const valEl = document.getElementById(valMap[id]);
-    if(valEl) valEl.textContent = 'ERROR';
-  });
-
-  if(!isNormal) log('FAULT ' + code + ': ' + info.name, 'err');
-  checkTripBadges();
-}
-
-// ── SIM TELEMETRY ──
-function parseSimTelemetry(d) {
-  // d has: Flow2_m, Pressure2_m, UpTank_m, DownTank_m
-  const simMap = [
-    {code:3, simKey:'Flow2_m',    simId:'simFlow2', unit:'m³/h (SIM)'},
-    {code:4, simKey:'Pressure2_m',simId:'simP2',    unit:'bar (SIM)'},
-    {code:5, simKey:'UpTank_m',   simId:'simTop',   unit:'cm (SIM)'},
-    {code:6, simKey:'DownTank_m', simId:'simBot',   unit:'cm (SIM)'}
-  ];
-  simMap.forEach(({code, simKey, simId, unit}) => {
-    const el = document.getElementById(simId);
-    if(!el) return;
-    const val = d[simKey];
-    if(val !== undefined) {
-      el.textContent = '▶ SIM: ' + parseFloat(val).toFixed(2) + ' ' + unit;
-      el.style.display = (currentFaultCode === code) ? 'block' : 'none';
-    }
-  });
-}
-
 function parseTelemetry(d){
   lastTelemetry=d;
   const s=d.sensors||{};
   const set=(id,v)=>{const el=document.getElementById(id);if(el&&v!==undefined)el.textContent=parseFloat(v).toFixed(2);};
-  set('sFlow1',s.flow1);
-  if(currentFaultCode!==3) set('sFlow2',s.flow2);
-  set('sP1',s.pressure1);
-  if(currentFaultCode!==4) set('sP2',s.pressure2);
-  if(currentFaultCode!==5) set('sTop',s.levelTop);
-  if(currentFaultCode!==6) set('sBot',s.levelBottom);
+  set('sFlow1',s.flow1);set('sFlow2',s.flow2);
+  set('sP1',s.pressure1);set('sP2',s.pressure2);
+  set('sTop',s.levelTop);set('sBot',s.levelBottom);
 
   // Tank fill percentage based on max heights
   const top=parseFloat(s.levelTop)||0;
@@ -1248,10 +1074,6 @@ function parseTelemetry(d){
     setPump('stPumpA',d.pumps.pumpA);
     setPump('stPumpB',d.pumps.pumpB);
     setPump('stPumpC',d.pumps.pumpC);
-    realState.A = (d.pumps.pumpA === 'OPEN') ? 1 : 0;
-    realState.B = (d.pumps.pumpB === 'OPEN') ? 1 : 0;
-    realState.C = (d.pumps.pumpC === 'OPEN') ? 1 : 0;
-    checkTripBadges();
     // Also update guest view
     setPumpGuest('stPumpAGuest',d.pumps.pumpA);
     setPumpGuest('stPumpBGuest',d.pumps.pumpB);
@@ -1302,116 +1124,6 @@ function setValveStatusGuest(i,status){
   else el.classList.add('status-unknown');
 }
 
-// ── FTC MODE TOGGLE ──
-let ftcModeOn = false;
-
-const FTC_TO_REAL = {
-  'water/control/ftc/pumpA' : 'water/control/pumpA',
-  'water/control/ftc/pumpB' : 'water/control/pumpB',
-  'water/control/ftc/pumpC' : 'water/control/pumpC',
-  'water/control/ftc/valve7': 'water/control/valve7'
-};
-const REAL_TO_FTC = {
-  'water/control/pumpA' : 'water/control/ftc/pumpA',
-  'water/control/pumpB' : 'water/control/ftc/pumpB',
-  'water/control/pumpC' : 'water/control/ftc/pumpC',
-  'water/control/valve7': 'water/control/ftc/valve7'
-};
-
-function onFtcToggle(checked){
-  ftcModeOn = checked;
-  const txt = document.getElementById('ftcStatusText');
-  if(checked){
-    txt.className = 'ftc-status-text on';
-    txt.textContent = 'ON — Commands routed through Matlab FTC';
-    log('FTC Mode ON — publishing to ftc topics via Matlab','ok');
-  } else {
-    txt.className = 'ftc-status-text off';
-    txt.textContent = 'OFF — Direct control (bypasses Matlab)';
-    log('FTC Mode OFF — publishing directly to real topics','info');
-  }
-}
-
-function resetFTC(){
-  if(currentMode === 'guest'){log('Command blocked — Guest mode is read-only','err');return;}
-  if(!connected){log('Not connected to MQTT','err');return;}
-
-  // 1. Clear ftc tracking and badges
-  ['A','B','C'].forEach(p => {
-    ftcIn[p]    = '0';
-    ftcOut[p]   = '0';
-    realState[p] = 0;
-  });
-  checkTripBadges();
-
-  // 2. Zero all command topics
-  ['pumpA','pumpB','pumpC'].forEach(p => {
-    client.publish('water/control/ftc/' + p, '0', {retain: true});
-  });
-  client.publish('water/control/ftc/valve7', '0', {retain: true});
-
-  // 3. Send reset pulse so Simulink clears the latch
-  setTimeout(() => {
-    client.publish('water/control/ftc/reset', '1');
-    log('⟳ FTC reset: all commands zeroed, trips cleared, latch released','ok');
-    setTimeout(() => client.publish('water/control/ftc/reset', '0'), 500);
-  }, 150);
-}
-
-// ── FTC INPUT/OUTPUT TRACKING ──
-// ftcIn    = what was sent INTO Matlab (water/control/ftc/pumpX)
-// ftcOut   = what Matlab actually output (water/control/pumpX)
-// realState = actual pump state from water/system/telemetry d.pumps
-const ftcIn    = {A:'0', B:'0', C:'0'};
-const ftcOut   = {A:'0', B:'0', C:'0'};
-const realState = {A:0,   B:0,   C:0};
-
-// TRIPPED: faultCode=2 AND ftcIn='1' AND realState=0  (commanded ON, real pump not running)
-// BACKUP:  faultCode=2 AND ftcIn='0' AND ftcOut='1'   (Matlab turned it on as backup)
-function checkTripBadges(){
-  ['A','B','C'].forEach(p => {
-    const tripped = (currentFaultCode===2 && ftcIn[p]==='1' && realState[p]===0);
-    const backup  = (currentFaultCode===2 && ftcIn[p]==='0' && ftcOut[p]==='1');
-
-    const opCard    = document.getElementById('cardPump'+p);
-    const guestCard = document.getElementById('cardPump'+p+'Guest');
-    const tripOp    = document.getElementById('tripBadge'+p);
-    const tripG     = document.getElementById('tripBadge'+p+'Guest');
-    const backupOp  = document.getElementById('backupBadge'+p);
-    const backupG   = document.getElementById('backupBadge'+p+'Guest');
-
-    if(tripped){
-      opCard?.classList.add('tripped');
-      guestCard?.classList.add('tripped');
-      tripOp?.classList.add('show-badge');
-      tripG?.classList.add('show-badge');
-    } else {
-      opCard?.classList.remove('tripped');
-      guestCard?.classList.remove('tripped');
-      tripOp?.classList.remove('show-badge');
-      tripG?.classList.remove('show-badge');
-    }
-
-    if(backup){
-      backupOp?.classList.add('show-badge');
-      backupG?.classList.add('show-badge');
-    } else {
-      backupOp?.classList.remove('show-badge');
-      backupG?.classList.remove('show-badge');
-    }
-  });
-}
-
-function resolveTopic(topic){
-  if(ftcModeOn){
-    // FTC ON: use ftc topics (Matlab in the middle)
-    return REAL_TO_FTC[topic] || topic;
-  } else {
-    // FTC OFF: use real topics directly
-    return FTC_TO_REAL[topic] || topic;
-  }
-}
-
 function sendCmd(topic,payload){
   // Block commands in guest mode
   if(currentMode === 'guest'){
@@ -1419,9 +1131,8 @@ function sendCmd(topic,payload){
     return;
   }
   if(!connected){log('Not connected to MQTT','err');return;}
-  const resolved = resolveTopic(topic);
-  client.publish(resolved, payload);
-  log('&#8594; '+resolved+': '+payload,'ok');
+  client.publish(topic,payload);
+  log('&#8594; '+topic+': '+payload,'ok');
 }
 
 // ── VALVES ──
@@ -1521,16 +1232,16 @@ function downloadExcel(){
 }
 
 // ── SCENARIO BUILDER ──
-const PUMP_TOPICS={A:'water/control/ftc/pumpA',B:'water/control/ftc/pumpB',C:'water/control/ftc/pumpC'};
-const VALVE_TOPICS={1:'water/control/valve1',2:'water/control/valve2',3:'water/control/valve3',4:'water/control/valve4',5:'water/control/valve5',6:'water/control/valve6',7:'water/control/ftc/valve7',8:'water/control/valve8'};
+const PUMP_TOPICS={A:'water/control/pumpA',B:'water/control/pumpB',C:'water/control/pumpC'};
+const VALVE_TOPICS={1:'water/control/valve1',2:'water/control/valve2',3:'water/control/valve3',4:'water/control/valve4',5:'water/control/valve5',6:'water/control/valve6',7:'water/control/valve7',8:'water/control/valve8'};
 const BLK_LABEL={pumpOn:'Pump ON',pumpOff:'Pump OFF',valveOpen:'Valve OPEN',valveClose:'Valve CLOSE',startSeq:'Start SEQ',stopSeq:'Stop SEQ',resetSeq:'Reset SEQ',wait:'Wait',custom:'Custom MSG',condition:'Condition'};
 const BLK_CLS={pumpOn:'pump',pumpOff:'pump',valveOpen:'valve',valveClose:'valve',startSeq:'seq',stopSeq:'seq',resetSeq:'seq',wait:'wait',custom:'custom',condition:'cond'};
 const BLK_ICO={pumpOn:'&#9889;',pumpOff:'&#9675;',valveOpen:'&#8853;',valveClose:'&#8855;',startSeq:'&#9654;',stopSeq:'&#9632;',resetSeq:'&#x21BA;',wait:'&#9201;',custom:'&#9998;',condition:'&#9873;'};
 
 let scenarios=[
   {name:'Normal Start',steps:[{type:'startSeq',pump:null,valve:null,delay:0,topic:'water/control/startSequence',payload:'1'}]},
-  {name:'PumpA Fault',steps:[{type:'pumpOff',pump:'A',valve:null,delay:0,topic:'water/control/ftc/pumpA',payload:'0'},{type:'pumpOn',pump:'B',valve:null,delay:800,topic:'water/control/ftc/pumpB',payload:'1'}]},
-  {name:'All Off',steps:[{type:'pumpOff',pump:'A',valve:null,delay:0,topic:'water/control/ftc/pumpA',payload:'0'},{type:'pumpOff',pump:'B',valve:null,delay:300,topic:'water/control/ftc/pumpB',payload:'0'},{type:'pumpOff',pump:'C',valve:null,delay:600,topic:'water/control/ftc/pumpC',payload:'0'}]}
+  {name:'PumpA Fault',steps:[{type:'pumpOff',pump:'A',valve:null,delay:0,topic:'water/control/pumpA',payload:'0'},{type:'pumpOn',pump:'B',valve:null,delay:800,topic:'water/control/pumpB',payload:'1'}]},
+  {name:'All Off',steps:[{type:'pumpOff',pump:'A',valve:null,delay:0,topic:'water/control/pumpA',payload:'0'},{type:'pumpOff',pump:'B',valve:null,delay:300,topic:'water/control/pumpB',payload:'0'},{type:'pumpOff',pump:'C',valve:null,delay:600,topic:'water/control/pumpC',payload:'0'}]}
 ];
 let activeIdx=0,dragType=null;
 
@@ -1795,7 +1506,7 @@ function scadaValveClick(num) {
   if (currentMode === 'operator') {
     // toggle
     const newState = (status === 'OPEN') ? '0' : '1';
-    sendCmd('water/control/ftc/valve'+num, newState);
+    sendCmd('water/control/valve'+num, newState);
   } else {
     showScadaTip(label + ': ' + (status || 'UNKNOWN'));
   }
@@ -1805,7 +1516,7 @@ function scadaPumpClick(p) {
   const status = lastTelemetry.pumps ? lastTelemetry.pumps['pump'+p] : 'UNKNOWN';
   if (currentMode === 'operator') {
     const newState = (status === 'OPEN') ? '0' : '1';
-    sendCmd('water/control/ftc/pump'+p, newState);
+    sendCmd('water/control/pump'+p, newState);
   } else {
     showScadaTip('PUMP ' + p + ': ' + (status || 'UNKNOWN'));
   }
