@@ -36,12 +36,8 @@ html{background:#0a1628}body{background:linear-gradient(135deg,#0a1628,#0f1f35);
 .pump-row{display:flex;flex-direction:column;gap:8px}
 .pump-item{display:flex;align-items:center;gap:10px;background:var(--c3);border-radius:6px;padding:8px 10px}
 .pump-item.tripped{background:#ef444410;border:1px solid #ef444466;animation:faultPulse 1.5s infinite}
-.pump-item.locked{background:#f59e0b08;border:1px solid #f59e0b55;opacity:0.85}
 .pump-item-ro{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--c3);border-radius:6px;padding:8px 10px}
 .pump-item-ro.tripped{background:#ef444410;border:1px solid #ef444466;animation:faultPulse 1.5s infinite}
-.pump-item-ro.locked{background:#f59e0b08;border:1px solid #f59e0b55;opacity:0.85}
-.badge-lock{display:none;font-size:9px;font-weight:700;letter-spacing:1px;color:#f59e0b;background:#f59e0b18;border:1px solid #f59e0b55;border-radius:4px;padding:2px 6px;font-family:'Courier New',monospace;white-space:nowrap}
-.btn-grp.ctrl-locked button{opacity:0.35;pointer-events:none;cursor:not-allowed;}
 .badge-trip{display:none;font-size:9px;font-weight:700;letter-spacing:1px;color:#ef4444;background:#ef444422;border:1px solid #ef444455;border-radius:4px;padding:2px 6px;font-family:'Courier New',monospace;white-space:nowrap}
 .badge-backup{display:none;font-size:9px;font-weight:700;letter-spacing:1px;color:#f59e0b;background:#f59e0b18;border:1px solid #f59e0b55;border-radius:4px;padding:2px 6px;font-family:'Courier New',monospace;white-space:nowrap}
 .show-badge{display:inline-block!important}
@@ -124,8 +120,6 @@ html{background:#0a1628}body{background:linear-gradient(135deg,#0a1628,#0f1f35);
 .sensor-card.fault .sensor-val{color:var(--danger)}
 .sensor-card.fault .sensor-label{color:var(--danger)}
 .sensor-sim{font-size:10px;color:var(--acc2);margin-top:3px;letter-spacing:1px}
-.sensor-fault-val{display:none;font-size:11px;color:#ef4444;margin-top:2px;font-family:'Courier New',monospace;letter-spacing:1px}
-.sensor-card.fault .sensor-fault-val{display:block}
 
 /* Mode Toggle Styles */
 .mode-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;background:var(--c1);border-radius:8px;border:1px solid var(--c4);margin-bottom:10px}
@@ -430,11 +424,11 @@ html{background:#0a1628}body{background:linear-gradient(135deg,#0a1628,#0f1f35);
   <div class="sub-label">Flow &amp; Pressure</div>
   <div class="sensor-grid">
     <div class="sensor-card"><div class="sensor-label">Flow 1</div><div class="sensor-val" id="sFlow1">—</div><div class="sensor-unit">m³/h</div></div>
-    <div class="sensor-card" id="cardFlow2"><div class="sensor-label">Flow 2</div><div class="sensor-val" id="sFlow2">—</div><div class="sensor-unit">m³/h</div><div class="sensor-fault-val" id="faultFlow2">⚠ FAULT: —</div><div class="sensor-sim" id="simFlow2" style="display:none"></div></div>
+    <div class="sensor-card" id="cardFlow2"><div class="sensor-label">Flow 2</div><div class="sensor-val" id="sFlow2">—</div><div class="sensor-unit">m³/h</div><div class="sensor-sim" id="simFlow2" style="display:none"></div></div>
     <div class="sensor-card"><div class="sensor-label">Pressure 1</div><div class="sensor-val" id="sP1">—</div><div class="sensor-unit">bar</div></div>
-    <div class="sensor-card" id="cardP2"><div class="sensor-label">Pressure 2</div><div class="sensor-val" id="sP2">—</div><div class="sensor-unit">bar</div><div class="sensor-fault-val" id="faultP2">⚠ FAULT: —</div><div class="sensor-sim" id="simP2" style="display:none"></div></div>
-    <div class="sensor-card" id="cardTop"><div class="sensor-label">Level Top</div><div class="sensor-val" id="sTop">—</div><div class="sensor-unit">cm</div><div class="sensor-fault-val" id="faultTop">⚠ FAULT: —</div><div class="sensor-sim" id="simTop" style="display:none"></div></div>
-    <div class="sensor-card" id="cardBot"><div class="sensor-label">Level Bot</div><div class="sensor-val" id="sBot">—</div><div class="sensor-unit">cm</div><div class="sensor-fault-val" id="faultBot">⚠ FAULT: —</div><div class="sensor-sim" id="simBot" style="display:none"></div></div>
+    <div class="sensor-card" id="cardP2"><div class="sensor-label">Pressure 2</div><div class="sensor-val" id="sP2">—</div><div class="sensor-unit">bar</div><div class="sensor-sim" id="simP2" style="display:none"></div></div>
+    <div class="sensor-card" id="cardTop"><div class="sensor-label">Level Top</div><div class="sensor-val" id="sTop">—</div><div class="sensor-unit">cm</div><div class="sensor-sim" id="simTop" style="display:none"></div></div>
+    <div class="sensor-card" id="cardBot"><div class="sensor-label">Level Bot</div><div class="sensor-val" id="sBot">—</div><div class="sensor-unit">cm</div><div class="sensor-sim" id="simBot" style="display:none"></div></div>
   </div>
 </div>
 
@@ -446,9 +440,8 @@ html{background:#0a1628}body{background:linear-gradient(135deg,#0a1628,#0f1f35);
       <div class="pump-name">PUMP A <span class="badge badge-vfd">Cont</span></div>
       <span class="badge-trip" id="tripBadgeA">⚠ TRIPPED</span>
       <span class="badge-backup" id="backupBadgeA">↩ BACKUP</span>
-      <span class="badge-lock" id="lockBadgeA">🔒 LOCKED</span>
       <div class="pump-status status-unknown" id="stPumpA">UNKNOWN</div>
-      <div class="btn-grp" id="btnGrpA">
+      <div class="btn-grp">
         <button class="btn btn-on" onclick="sendCmd('water/control/ftc/pumpA','1')">ON</button>
         <button class="btn btn-off" onclick="sendCmd('water/control/ftc/pumpA','0')">OFF</button>
       </div>
@@ -457,9 +450,8 @@ html{background:#0a1628}body{background:linear-gradient(135deg,#0a1628,#0f1f35);
       <div class="pump-name">PUMP B <span class="badge badge-dol">SOFT</span></div>
       <span class="badge-trip" id="tripBadgeB">⚠ TRIPPED</span>
       <span class="badge-backup" id="backupBadgeB">↩ BACKUP</span>
-      <span class="badge-lock" id="lockBadgeB">🔒 LOCKED</span>
       <div class="pump-status status-unknown" id="stPumpB">UNKNOWN</div>
-      <div class="btn-grp" id="btnGrpB">
+      <div class="btn-grp">
         <button class="btn btn-on" onclick="sendCmd('water/control/ftc/pumpB','1')">ON</button>
         <button class="btn btn-off" onclick="sendCmd('water/control/ftc/pumpB','0')">OFF</button>
       </div>
@@ -468,9 +460,8 @@ html{background:#0a1628}body{background:linear-gradient(135deg,#0a1628,#0f1f35);
       <div class="pump-name">PUMP C <span class="badge badge-soft">VFD</span></div>
       <span class="badge-trip" id="tripBadgeC">⚠ TRIPPED</span>
       <span class="badge-backup" id="backupBadgeC">↩ BACKUP</span>
-      <span class="badge-lock" id="lockBadgeC">🔒 LOCKED</span>
       <div class="pump-status status-unknown" id="stPumpC">UNKNOWN</div>
-      <div class="btn-grp" id="btnGrpC">
+      <div class="btn-grp">
         <button class="btn btn-on" onclick="sendCmd('water/control/ftc/pumpC','1')">ON</button>
         <button class="btn btn-off" onclick="sendCmd('water/control/ftc/pumpC','0')">OFF</button>
       </div>
@@ -494,7 +485,6 @@ html{background:#0a1628}body{background:linear-gradient(135deg,#0a1628,#0f1f35);
         <span class="badge badge-vfd">Cont</span>
         <span class="badge-trip" id="tripBadgeAGuest">⚠ TRIPPED</span>
         <span class="badge-backup" id="backupBadgeAGuest">↩ BACKUP</span>
-        <span class="badge-lock" id="lockBadgeAGuest">🔒 LOCKED</span>
       </div>
       <div class="pump-status-ro status-unknown" id="stPumpAGuest">UNKNOWN</div>
     </div>
@@ -504,7 +494,6 @@ html{background:#0a1628}body{background:linear-gradient(135deg,#0a1628,#0f1f35);
         <span class="badge badge-dol">SOFT</span>
         <span class="badge-trip" id="tripBadgeBGuest">⚠ TRIPPED</span>
         <span class="badge-backup" id="backupBadgeBGuest">↩ BACKUP</span>
-        <span class="badge-lock" id="lockBadgeBGuest">🔒 LOCKED</span>
       </div>
       <div class="pump-status-ro status-unknown" id="stPumpBGuest">UNKNOWN</div>
     </div>
@@ -514,7 +503,6 @@ html{background:#0a1628}body{background:linear-gradient(135deg,#0a1628,#0f1f35);
         <span class="badge badge-soft">VFD</span>
         <span class="badge-trip" id="tripBadgeCGuest">⚠ TRIPPED</span>
         <span class="badge-backup" id="backupBadgeCGuest">↩ BACKUP</span>
-        <span class="badge-lock" id="lockBadgeCGuest">🔒 LOCKED</span>
       </div>
       <div class="pump-status-ro status-unknown" id="stPumpCGuest">UNKNOWN</div>
     </div>
@@ -1209,8 +1197,6 @@ function updateFaultStatus(code) {
   });
 
   if(!isNormal) log('FAULT ' + code + ': ' + info.name, 'err');
-  // Lock pump controls on flow blockage (fault 1), keep locked until reset
-  if(code === 1) setLockedState(true);
   checkTripBadges();
 }
 
@@ -1238,14 +1224,12 @@ function parseTelemetry(d){
   lastTelemetry=d;
   const s=d.sensors||{};
   const set=(id,v)=>{const el=document.getElementById(id);if(el&&v!==undefined)el.textContent=parseFloat(v).toFixed(2);};
-  const setFault=(faultId,v,unit)=>{const el=document.getElementById(faultId);if(el&&v!==undefined)el.textContent='⚠ FAULT: '+parseFloat(v).toFixed(2)+' '+unit;};
-
   set('sFlow1',s.flow1);
-  if(currentFaultCode===3){ setFault('faultFlow2',s.flow2,'m³/h'); } else { set('sFlow2',s.flow2); }
+  if(currentFaultCode!==3) set('sFlow2',s.flow2);
   set('sP1',s.pressure1);
-  if(currentFaultCode===4){ setFault('faultP2',s.pressure2,'bar'); } else { set('sP2',s.pressure2); }
-  if(currentFaultCode===5){ setFault('faultTop',s.levelTop,'cm'); } else { set('sTop',s.levelTop); }
-  if(currentFaultCode===6){ setFault('faultBot',s.levelBottom,'cm'); } else { set('sBot',s.levelBottom); }
+  if(currentFaultCode!==4) set('sP2',s.pressure2);
+  if(currentFaultCode!==5) set('sTop',s.levelTop);
+  if(currentFaultCode!==6) set('sBot',s.levelBottom);
 
   // Tank fill percentage based on max heights
   const top=parseFloat(s.levelTop)||0;
@@ -1352,13 +1336,12 @@ function resetFTC(){
   if(currentMode === 'guest'){log('Command blocked — Guest mode is read-only','err');return;}
   if(!connected){log('Not connected to MQTT','err');return;}
 
-  // 1. Clear ftc tracking, badges, and locked state
+  // 1. Clear ftc tracking and badges
   ['A','B','C'].forEach(p => {
     ftcIn[p]    = '0';
     ftcOut[p]   = '0';
     realState[p] = 0;
   });
-  setLockedState(false);
   checkTripBadges();
 
   // 2. Zero all command topics
@@ -1383,20 +1366,8 @@ const ftcIn    = {A:'0', B:'0', C:'0'};
 const ftcOut   = {A:'0', B:'0', C:'0'};
 const realState = {A:0,   B:0,   C:0};
 
-// ── LOCKED STATE (fault code 1: flow blockage) ──
-function setLockedState(locked){
-  ['A','B','C'].forEach(p => {
-    // Cards
-    document.getElementById('cardPump'+p)?.classList.toggle('locked', locked);
-    document.getElementById('cardPump'+p+'Guest')?.classList.toggle('locked', locked);
-    // Lock badges
-    document.getElementById('lockBadge'+p)?.classList.toggle('show-badge', locked);
-    document.getElementById('lockBadge'+p+'Guest')?.classList.toggle('show-badge', locked);
-    // Dim buttons
-    document.getElementById('btnGrp'+p)?.classList.toggle('ctrl-locked', locked);
-  });
-}
-
+// TRIPPED: faultCode=2 AND ftcIn='1' AND realState=0  (commanded ON, real pump not running)
+// BACKUP:  faultCode=2 AND ftcIn='0' AND ftcOut='1'   (Matlab turned it on as backup)
 function checkTripBadges(){
   ['A','B','C'].forEach(p => {
     const tripped = (currentFaultCode===2 && ftcIn[p]==='1' && realState[p]===0);
