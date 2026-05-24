@@ -1209,16 +1209,8 @@ function updateFaultStatus(code) {
   });
 
   if(!isNormal) log('FAULT ' + code + ': ' + info.name, 'err');
-  // Lock pump controls on flow blockage (fault 1), only when FTC mode is ON
-  // latchedLock mirrors Matlab's persistent latch — only reset clears it
-  // Set latch whenever fault 1 arrives (regardless of FTC mode)
-  if(code === 1){
-    latchedLock = true;
-    // Only show visual lock if FTC mode is ON
-    if(ftcModeOn) setLockedState(true);
-  }
-  // When fault clears, keep locked visually (Matlab latch still holds)
-  // setLockedState(false) only happens in resetFTC()
+  // Lock pump controls on flow blockage (fault 1), keep locked until reset
+  if(code === 1) setLockedState(true);
   checkTripBadges();
 }
 
@@ -1328,7 +1320,6 @@ function setValveStatusGuest(i,status){
 
 // ── FTC MODE TOGGLE ──
 let ftcModeOn = false;
-let latchedLock = false; // mirrors Matlab's persistent latch for fault 1
 
 const FTC_TO_REAL = {
   'water/control/ftc/pumpA' : 'water/control/pumpA',
@@ -1350,14 +1341,10 @@ function onFtcToggle(checked){
     txt.className = 'ftc-status-text on';
     txt.textContent = 'ON — Commands routed through Matlab FTC';
     log('FTC Mode ON — publishing to ftc topics via Matlab','ok');
-    // If blockage latch is still active, show locked immediately
-    if(latchedLock) setLockedState(true);
   } else {
     txt.className = 'ftc-status-text off';
     txt.textContent = 'OFF — Direct control (bypasses Matlab)';
     log('FTC Mode OFF — publishing directly to real topics','info');
-    // Unlock visually when leaving FTC mode
-    setLockedState(false);
   }
 }
 
@@ -1371,7 +1358,6 @@ function resetFTC(){
     ftcOut[p]   = '0';
     realState[p] = 0;
   });
-  latchedLock = false;
   setLockedState(false);
   checkTripBadges();
 
