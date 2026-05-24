@@ -1122,8 +1122,6 @@ function toggleMqtt(){
       client.subscribe('water/control/#');
       client.subscribe('water/system/faultcode');
       client.subscribe('water/sim/telemetry');
-      client.subscribe('water/system/ftcmode');
-      client.subscribe('water/system/ftcreset');
     });
     client.on('message',(topic,payload)=>{
       const msg=payload.toString().trim();
@@ -1138,12 +1136,6 @@ function toggleMqtt(){
       else if(topic==='water/control/pumpA'){ftcOut.A=msg; checkTripBadges();}
       else if(topic==='water/control/pumpB'){ftcOut.B=msg; checkTripBadges();}
       else if(topic==='water/control/pumpC'){ftcOut.C=msg; checkTripBadges();}
-      else if(topic==='water/system/ftcmode'){
-        setFtcMode(msg==='1', false);
-      }
-      else if(topic==='water/system/ftcreset'){
-        doResetUI(false);
-      }
       else{log('&#8592; '+topic+': '+msg,'info');}
     });
     client.on('error',e=>{log('Error: '+e.message,'err');setMqttStatus(false,'broker.hivemq.com');});
@@ -1351,32 +1343,28 @@ const REAL_TO_FTC = {
   'water/control/valve7': 'water/control/ftc/valve7'
 };
 
-function setFtcMode(checked, publish){
-  if(ftcModeOn === checked) return;
+function onFtcToggle(checked){
   ftcModeOn = checked;
-  document.getElementById('ftcToggle').checked = checked;
   const txt = document.getElementById('ftcStatusText');
   if(checked){
     txt.className = 'ftc-status-text on';
     txt.textContent = 'ON — Commands routed through Matlab FTC';
     log('FTC Mode ON — publishing to ftc topics via Matlab','ok');
+    // If blockage latch is still active, show locked immediately
     if(latchedLock) setLockedState(true);
   } else {
     txt.className = 'ftc-status-text off';
     txt.textContent = 'OFF — Direct control (bypasses Matlab)';
     log('FTC Mode OFF — publishing directly to real topics','info');
+    // Unlock visually when leaving FTC mode
     setLockedState(false);
   }
-  if(publish && connected && client){
-    client.publish('water/system/ftcmode', checked ? '1' : '0', {retain: true});
-  }
 }
 
-function onFtcToggle(checked){
-  setFtcMode(checked, true);
-}
+function resetFTC(){
+  if(currentMode === 'guest'){log('Command blocked — Guest mode is read-only','err');return;}
+  if(!connected){log('Not connected to MQTT','err');return;}
 
-function doResetUI(sendCmds){
   // 1. Clear ftc tracking, badges, and locked state
   ['A','B','C'].forEach(p => {
     ftcIn[p]    = '0';
@@ -1387,32 +1375,18 @@ function doResetUI(sendCmds){
   setLockedState(false);
   checkTripBadges();
 
-  if(sendCmds){
-    // 2. Zero all command topics
-    ['pumpA','pumpB','pumpC'].forEach(p => {
-      client.publish('water/control/ftc/' + p, '0', {retain: true});
-    });
-    client.publish('water/control/ftc/valve7', '0', {retain: true});
+  // 2. Zero all command topics
+  ['pumpA','pumpB','pumpC'].forEach(p => {
+    client.publish('water/control/ftc/' + p, '0', {retain: true});
+  });
+  client.publish('water/control/ftc/valve7', '0', {retain: true});
 
-    // 3. Send reset pulse so Simulink clears the latch
-    setTimeout(() => {
-      client.publish('water/control/ftc/reset', '1');
-      log('⟳ FTC reset: all commands zeroed, trips cleared, latch released','ok');
-      setTimeout(() => client.publish('water/control/ftc/reset', '0'), 500);
-    }, 150);
-  } else {
-    log('⟳ FTC reset synced from another client','ok');
-  }
-}
-
-function resetFTC(){
-  if(currentMode === 'guest'){log('Command blocked — Guest mode is read-only','err');return;}
-  if(!connected){log('Not connected to MQTT','err');return;}
-
-  doResetUI(true);
-
-  // Notify all other dashboards
-  if(client){ client.publish('water/system/ftcreset', '1'); }
+  // 3. Send reset pulse so Simulink clears the latch
+  setTimeout(() => {
+    client.publish('water/control/ftc/reset', '1');
+    log('⟳ FTC reset: all commands zeroed, trips cleared, latch released','ok');
+    setTimeout(() => client.publish('water/control/ftc/reset', '0'), 500);
+  }, 150);
 }
 
 // ── FTC INPUT/OUTPUT TRACKING ──
