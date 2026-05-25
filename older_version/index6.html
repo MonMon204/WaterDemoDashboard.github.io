@@ -95,22 +95,18 @@ html{background:#0a1628}body{background:linear-gradient(135deg,#0a1628,#0f1f35);
 .fault-banner{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:6px;border:1px solid var(--c4);background:var(--c3);transition:all .3s}
 .fault-banner.normal{border-color:#22c55e44;background:#22c55e08}
 .fault-banner.active{border-color:#ef444466;background:#ef444410;animation:faultPulse 1.5s infinite}
-.fault-banner.uncertain{border-color:#f59e0b66;background:#f59e0b08}
 @keyframes faultPulse{0%,100%{box-shadow:0 0 0 0 #ef444400}50%{box-shadow:0 0 0 4px #ef444422}}
 .fault-code-badge{font-size:22px;font-weight:700;font-family:'Courier New',monospace;min-width:32px;text-align:center}
 .fault-code-badge.normal{color:var(--ok)}
 .fault-code-badge.active{color:var(--danger)}
-.fault-code-badge.uncertain{color:#f59e0b}
 .fault-info{flex:1}
 .fault-name{font-size:13px;font-weight:700;letter-spacing:1px;font-family:'Courier New',monospace}
 .fault-name.normal{color:var(--ok)}
 .fault-name.active{color:var(--danger)}
-.fault-name.uncertain{color:#f59e0b}
 .fault-action{font-size:10px;color:var(--txt2);margin-top:3px;letter-spacing:1px}
 .fault-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 .fault-dot.normal{background:var(--ok);box-shadow:0 0 6px var(--ok)}
 .fault-dot.active{background:var(--danger);box-shadow:0 0 6px var(--danger)}
-.fault-dot.uncertain{background:#f59e0b;box-shadow:0 0 6px #f59e0b}
 /* FTC toggle */
 .ftc-toggle-wrap{display:flex;align-items:center;gap:10px;padding:8px 14px;border-radius:6px;border:1px solid var(--c4);background:var(--c3)}
 .ftc-toggle-label{font-size:11px;font-weight:700;letter-spacing:1px;font-family:'Courier New',monospace;color:var(--txt2)}
@@ -1160,82 +1156,28 @@ const UP_TANK_MAX_CM = 32;
 const DOWN_TANK_MAX_CM = 22;
 
 // ── FAULT STATUS ──
-const FAULT_LABELS = {
-  1: 'FLOW BLOCKAGE',
-  2: 'PUMP TRIP',
-  3: 'FLOW2 SENSOR FAULT',
-  4: 'PRESSURE2 SENSOR FAULT',
-  5: 'UPTANK SENSOR FAULT',
-  6: 'DOWNTANK SENSOR FAULT'
+const FAULT_NAMES = {
+  0: {name:'NORMAL', action:'FTC: System operating normally. All commands pass through.'},
+  1: {name:'FLOW BLOCKAGE', action:'FTC: Blocked pump shut down automatically.'},
+  2: {name:'PUMP TRIP', action:'FTC: Tripped pump stopped, backup pump started.'},
+  3: {name:'FLOW2 SENSOR FAULT', action:'FTC: Flow2 reading substituted with Simulink model value.'},
+  4: {name:'PRESSURE2 SENSOR FAULT', action:'FTC: Pressure2 reading substituted with Simulink model value.'},
+  5: {name:'UPTANK SENSOR FAULT', action:'FTC: UpTank level substituted with Simulink model value.'},
+  6: {name:'DOWNTANK SENSOR FAULT', action:'FTC: DownTank level substituted with Simulink model value.'}
 };
-const FAULT_ACTIONS = {
-  1: 'FTC: All pumps shut down and locked until reset.',
-  2: 'FTC: Tripped pump stopped, backup pump started.',
-  3: 'FTC: Flow2 reading substituted with Simulink model value.',
-  4: 'FTC: Pressure2 reading substituted with Simulink model value.',
-  5: 'FTC: UpTank level substituted with Simulink model value.',
-  6: 'FTC: DownTank level substituted with Simulink model value.'
+// which fault codes are sensor faults (show ERROR + sim substitute)
+const SENSOR_FAULT_CARDS = {
+  3: ['cardFlow2'],
+  4: ['cardP2'],
+  5: ['cardTop'],
+  6: ['cardBot']
 };
-const SENSOR_CARD_MAP = {3:'cardFlow2', 4:'cardP2', 5:'cardTop', 6:'cardBot'};
-const SENSOR_VAL_MAP  = {cardFlow2:'sFlow2', cardP2:'sP2', cardTop:'sTop', cardBot:'sBot'};
-
-// Decode a fault code into its component digits
-function decodeFault(code){
-  if(code <= 0) return {digits:[], has_blockage:false, has_trip:false, sensors:[]};
-  let digits = [];
-  if(code < 10){
-    digits = [code];
-  } else {
-    digits = [Math.floor(code/10), code%10];
-  }
-  return {
-    digits,
-    has_blockage: digits.includes(1),
-    has_trip:     digits.includes(2),
-    sensors:      digits.filter(d => d>=3 && d<=6)
-  };
-}
-
 let currentFaultCode = 0;
 
 function updateFaultStatus(code) {
-  // Handle -1 as uncertain state
-  if(code === -1){
-    const banner = document.getElementById('faultBanner');
-    const dot    = document.getElementById('faultDot');
-    const badge  = document.getElementById('faultCodeBadge');
-    const name   = document.getElementById('faultName');
-    const action = document.getElementById('faultAction');
-    banner.className = 'fault-banner uncertain';
-    dot.className    = 'fault-dot uncertain';
-    badge.className  = 'fault-code-badge uncertain';
-    name.className   = 'fault-name uncertain';
-    badge.textContent  = '?';
-    name.textContent   = 'UNCERTAIN — ML model classifying...';
-    action.textContent = 'Waiting for confident fault classification.';
-    return;
-  }
-  // Ignore other invalid codes
-  if(code < -1) return;
-
   currentFaultCode = code;
   const isNormal = (code === 0);
-  const dec = decodeFault(code);
-
-  // Build human-readable name and action from decoded digits
-  let faultName, faultAction, badgeText;
-  if(isNormal){
-    faultName  = 'NORMAL — No Fault Detected';
-    faultAction = 'FTC: System operating normally. All commands pass through.';
-    badgeText  = '0';
-  } else {
-    const nameParts   = dec.digits.map(d => FAULT_LABELS[d]  || ('FAULT '+d));
-    const actionParts = dec.digits.map(d => FAULT_ACTIONS[d] || '');
-    faultName   = nameParts.join(' + ');
-    faultAction = actionParts.filter(Boolean).join(' | ');
-    // Format badge: single → "2", combined → "2 + 5"
-    badgeText   = dec.digits.join(' + ');
-  }
+  const info = FAULT_NAMES[code] || {name:'UNKNOWN FAULT ('+code+')', action:'FTC: Unknown fault code received.'};
 
   const banner = document.getElementById('faultBanner');
   const dot    = document.getElementById('faultDot');
@@ -1248,36 +1190,43 @@ function updateFaultStatus(code) {
   badge.className  = 'fault-code-badge ' + (isNormal ? 'normal' : 'active');
   name.className   = 'fault-name '   + (isNormal ? 'normal' : 'active');
 
-  badge.textContent  = badgeText;
-  name.textContent   = isNormal ? faultName : 'FAULT ' + badgeText + ': ' + faultName;
-  action.textContent = faultAction;
+  badge.textContent  = code;
+  name.textContent   = (isNormal ? 'NORMAL — No Fault Detected' : 'FAULT ' + code + ': ' + info.name);
+  action.textContent = info.action;
 
-  // Reset all sensor cards to normal first
+  // Reset all sensor cards to normal
   ['cardFlow2','cardP2','cardTop','cardBot'].forEach(id => {
-    document.getElementById(id)?.classList.remove('fault');
+    const card = document.getElementById(id);
+    if(card) card.classList.remove('fault');
   });
+  // Hide all sim labels
   ['simFlow2','simP2','simTop','simBot'].forEach(id => {
     const el = document.getElementById(id);
     if(el) el.style.display = 'none';
   });
 
-  // Mark faulty sensor cards based on decoded sensor digits
-  dec.sensors.forEach(d => {
-    const cardId = SENSOR_CARD_MAP[d];
-    if(!cardId) return;
-    document.getElementById(cardId)?.classList.add('fault');
-    const valEl = document.getElementById(SENSOR_VAL_MAP[cardId]);
+  // Mark faulty sensor cards
+  const faultyCards = SENSOR_FAULT_CARDS[code] || [];
+  faultyCards.forEach(id => {
+    const card = document.getElementById(id);
+    if(card) card.classList.add('fault');
+    // Show ERROR on the value
+    const valMap = {cardFlow2:'sFlow2', cardP2:'sP2', cardTop:'sTop', cardBot:'sBot'};
+    const valEl = document.getElementById(valMap[id]);
     if(valEl) valEl.textContent = 'ERROR';
   });
 
-  if(!isNormal) log('FAULT ' + code + ': ' + faultName, 'err');
-
-  // Latch lock on blockage (with or without sensor fault)
-  if(dec.has_blockage){
+  if(!isNormal) log('FAULT ' + code + ': ' + info.name, 'err');
+  // Lock pump controls on flow blockage (fault 1), only when FTC mode is ON
+  // latchedLock mirrors Matlab's persistent latch — only reset clears it
+  // Set latch whenever fault 1 arrives (regardless of FTC mode)
+  if(code === 1){
     latchedLock = true;
+    // Only show visual lock if FTC mode is ON
     if(ftcModeOn) setLockedState(true);
   }
-
+  // When fault clears, keep locked visually (Matlab latch still holds)
+  // setLockedState(false) only happens in resetFTC()
   checkTripBadges();
 }
 
@@ -1296,8 +1245,7 @@ function parseSimTelemetry(d) {
     const val = d[simKey];
     if(val !== undefined) {
       el.textContent = '▶ SIM: ' + parseFloat(val).toFixed(2) + ' ' + unit;
-      const dec = decodeFault(currentFaultCode);
-      el.style.display = dec.sensors.includes(code) ? 'block' : 'none';
+      el.style.display = (currentFaultCode === code) ? 'block' : 'none';
     }
   });
 }
@@ -1307,14 +1255,13 @@ function parseTelemetry(d){
   const s=d.sensors||{};
   const set=(id,v)=>{const el=document.getElementById(id);if(el&&v!==undefined)el.textContent=parseFloat(v).toFixed(2);};
   const setFault=(faultId,v,unit)=>{const el=document.getElementById(faultId);if(el&&v!==undefined)el.textContent='⚠ FAULT: '+parseFloat(v).toFixed(2)+' '+unit;};
-  const dec = decodeFault(currentFaultCode);
 
   set('sFlow1',s.flow1);
-  if(dec.sensors.includes(3)){ setFault('faultFlow2',s.flow2,'m³/h'); } else { set('sFlow2',s.flow2); }
+  if(currentFaultCode===3){ setFault('faultFlow2',s.flow2,'m³/h'); } else { set('sFlow2',s.flow2); }
   set('sP1',s.pressure1);
-  if(dec.sensors.includes(4)){ setFault('faultP2',s.pressure2,'bar'); } else { set('sP2',s.pressure2); }
-  if(dec.sensors.includes(5)){ setFault('faultTop',s.levelTop,'cm'); } else { set('sTop',s.levelTop); }
-  if(dec.sensors.includes(6)){ setFault('faultBot',s.levelBottom,'cm'); } else { set('sBot',s.levelBottom); }
+  if(currentFaultCode===4){ setFault('faultP2',s.pressure2,'bar'); } else { set('sP2',s.pressure2); }
+  if(currentFaultCode===5){ setFault('faultTop',s.levelTop,'cm'); } else { set('sTop',s.levelTop); }
+  if(currentFaultCode===6){ setFault('faultBot',s.levelBottom,'cm'); } else { set('sBot',s.levelBottom); }
 
   // Tank fill percentage based on max heights
   const top=parseFloat(s.levelTop)||0;
@@ -1491,10 +1438,9 @@ function setLockedState(locked){
 }
 
 function checkTripBadges(){
-  const dec = decodeFault(currentFaultCode);
   ['A','B','C'].forEach(p => {
-    const tripped = (dec.has_trip && ftcIn[p]==='1' && realState[p]===0);
-    const backup  = (dec.has_trip && ftcIn[p]==='0' && ftcOut[p]==='1');
+    const tripped = (currentFaultCode===2 && ftcIn[p]==='1' && realState[p]===0);
+    const backup  = (currentFaultCode===2 && ftcIn[p]==='0' && ftcOut[p]==='1');
 
     const opCard    = document.getElementById('cardPump'+p);
     const guestCard = document.getElementById('cardPump'+p+'Guest');
