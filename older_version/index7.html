@@ -1277,10 +1277,6 @@ function updateFaultStatus(code) {
     latchedLock = true;
     if(ftcModeOn) setLockedState(true);
   }
-  // Latch trip (with or without sensor fault)
-  if(dec.has_trip){
-    latchedTrip = true;
-  }
 
   checkTripBadges();
 }
@@ -1393,8 +1389,7 @@ function setValveStatusGuest(i,status){
 
 // ── FTC MODE TOGGLE ──
 let ftcModeOn = false;
-let latchedLock = false; // mirrors Matlab's persistent latch for blockage
-let latchedTrip = false; // mirrors Matlab's persistent latch for trip
+let latchedLock = false; // mirrors Matlab's persistent latch for fault 1
 
 const FTC_TO_REAL = {
   'water/control/ftc/pumpA' : 'water/control/pumpA',
@@ -1442,7 +1437,6 @@ function doResetUI(sendCmds){
     realState[p] = 0;
   });
   latchedLock = false;
-  latchedTrip = false;
   setLockedState(false);
   checkTripBadges();
 
@@ -1497,9 +1491,10 @@ function setLockedState(locked){
 }
 
 function checkTripBadges(){
+  const dec = decodeFault(currentFaultCode);
   ['A','B','C'].forEach(p => {
-    const tripped = (latchedTrip && ftcIn[p]==='1' && realState[p]===0);
-    const backup  = (latchedTrip && ftcIn[p]==='0' && ftcOut[p]==='1');
+    const tripped = (dec.has_trip && ftcIn[p]==='1' && realState[p]===0);
+    const backup  = (dec.has_trip && ftcIn[p]==='0' && ftcOut[p]==='1');
 
     const opCard    = document.getElementById('cardPump'+p);
     const guestCard = document.getElementById('cardPump'+p+'Guest');
